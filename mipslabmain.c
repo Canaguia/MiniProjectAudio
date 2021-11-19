@@ -12,7 +12,7 @@
 #include "mipslab.h"  /* Declatations for these labs */
 
 int main(void) {
-        /*
+    /*
 	  This will set the peripheral bus clock to the same frequency
 	  as the sysclock. That means 80 MHz, when the microcontroller
 	  is running at 80 MHz. Changed 2017, as recommended by Axel.

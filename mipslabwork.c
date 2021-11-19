@@ -1,14 +1,7 @@
 /* mipslabwork.c
 
-   This file written 2015 by F Lundevall
-   Updated 2017-04-21 by F Lundevall
-
-   This file should be changed by YOU! So you must
-   add comment(s) here with your name(s) and date(s):
-
-   This file modified 2017-04-31 by Ture Teknolog 
-
-   For copyright and licensing, see file COPYING */
+   This file written 2021 by Filip Karlsson 
+*/
 
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
@@ -16,10 +9,12 @@
 
 
 // DEFINE CONSTANTS
-#define TMR2PERIOD (80000000/16000) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz
+#define TMR2PERIOD ((80000000/1)/128000) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz (/8000 and 1:1) (now /128000 8khz)
 #if TMR2PERIOD > 0xffff
 #error "Timer period overflow."
 #endif
+
+int prime = 112;
 
 const int hi = 0x20;
 const int lo = 0x02;
@@ -28,9 +23,10 @@ const int DIN = (0x1 << 8);
 const int BCLK = (0x2 << 8);
 const int WSEL = (0x4 << 8);
 
-unsigned int sound;
+unsigned int sound = 0x00;
 unsigned int sweep = 0x1;
 
+int extendcount = 0;
 int cyclecount = 0;
 int bitcount = 0;
 char textstring[] = "text";
@@ -42,43 +38,75 @@ void specialdelay(int cyc) {
 
 /* Interrupt Service Routine */
 void user_isr(void) {
+    //if (extendcount >= 100) {
+        if (cyclecount % 2 == 0) {
+            PORTDCLR = BCLK; // switch Bit-Clock OFF
+            
+            if (cyclecount % 16 == 0) {
+                // PORTD = !WSEL; // switch Word-Select bit
+                if ((PORTD & WSEL) == 0) {
+                    PORTDSET = WSEL;
+                }
+                else {
+                    PORTDCLR = WSEL;
+                }
+                // reset bit selector
+                bitcount = 0x80;
 
-    if (cyclecount % 2 = 0) {
-        PORTDSET = BCLK; // switch Bit-Clock ON
-
-        if (cyclecount % 16 = 0) {
-            PORTD = !WSEL; // switch Word-Select bit
-            bitcount = 0; // send same output again (mono)
-
-            if (cyclecount % 32 = 0) {
-                cyclecount = 0; // marks the end of a double-mono cycle
+                if (cyclecount % 32 == 0) {
+                    cyclecount = 0; // marks the end of a double-mono cycle
+                }
             }
+            else if (cyclecount == 2) {
+                // reset bit selector
+                //bits = sizeof(uint32) * 8;
+                //slct = 1 << (bits - 1);
+                bitcount = 0x80;
+
+                // Read&load new sound-int value (will be replaced with reading from microphone)
+                if (sound == hi) {
+                    sound = lo;
+                }
+                else {
+                    sound = hi;
+                }
+
+                // load in sound
+            }
+
+            // set D-in bit (MSB-> LSB)
+            if ((bitcount & sound) == 0) {
+                PORTDCLR = DIN;
+            }
+            else {
+                PORTDSET = DIN;
+            }
+            bitcount = bitcount >> 1;
+
         }
-    }
-    else {
-        PORTDCLR = BCLK; // switch Bit-Clock OFF
-
-        if (cyclecount = 1) {
-            bitcount = 0;
-
-            // load new sound-int value
-            AD1CON1 |= (0x1 << 1); //SAMP
-            while (!(AD1CON1 & (0x1 << 1))); // SAMP
-            while (!(AD1CON1 & 0x1)); // DONE
-
-            sound = ADC1BUF0; // not sure how this is related to the thing above^
+        else {
+            PORTDSET = BCLK; // switch Bit-Clock ON
         }
+        cyclecount++;
+        //extendcount = 0;
+    //}
+    //extendcount++;
 
-        PORTD = DIN; // set D-in bit (MSB-> LSB)
-        bitcount++;
-    }
     IFS(0) &= ~0x100; // clear timer2 interrupt flag
-    cyclecount++;
+
+    //AD1CON1 |= (0x1 << 1); //SAMP
+    //while (!(AD1CON1 & (0x1 << 1))); // SAMP
+    //while (!(AD1CON1 & 0x1)); // DONE
+    //sound = ADC1BUF0; // not sure how this is related to the thing above^
 
     // if (300 < sound < 400) { sound = 0;} // to avoid background noise
+    /*
     time2string(textstring, sound);
     display_string(3, textstring);
+    time2string(textstring, cyclecount);
+    display_string(1, textstring);
     display_update();
+    */
 
     return;
 }
@@ -104,20 +132,14 @@ void labinit(void)
     TRISD &= ~(0x7 << 8); // set to ^ to output
 
     // Establish Timer2
-
     T2CONCLR = (0x1 << 15); // set timer to off
-    T2CONCLR = (0x7 << 4); // set prescale value to 1:1
+    T2CONCLR = (0x7 << 4); // set prescale value to 1:256 (1:1)
     PR2 = TMR2PERIOD; //  Set period in Hz
     TMR2 = 0; // reset current value
     T2CONSET = (0x1 << 15); // start timer
     enable_interrupt();
     IEC(0) = 0x100; // timer2 interrupt enable
     IPC(2) = 0x1C; // priority
-
-    // set size of input int
-    bits = sizeof(uint32) * 8;
-    slct = 1 << (bits - 1);
-    bitcount = slct;
 
     // HANDLE ANALOG INPUT
 
@@ -146,8 +168,5 @@ void labinit(void)
 
 /* This function is called repetitively from the main program */
 void labwork(void) {
-    prime = nextprime(prime);
-    display_string(0, itoaconv(prime));
-    display_update();
 }
 

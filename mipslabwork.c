@@ -9,15 +9,15 @@
 
 
 // DEFINE CONSTANTS
-#define TMR2PERIOD ((80000000/1)/128000) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz (/8000 and 1:1) (now /128000 8khz)
+#define TMR2PERIOD ((80000000/256)/100) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz (/8000 and 1:1) (now /128000 8khz) 
 #if TMR2PERIOD > 0xffff
 #error "Timer period overflow."
 #endif
 
 int prime = 112;
 
-const int hi = 0x20;
-const int lo = 0x02;
+const int hi = 0x00;
+const int lo = 0x00;
 
 const int DIN = (0x1 << 8);
 const int BCLK = (0x2 << 8);
@@ -26,6 +26,7 @@ const int WSEL = (0x4 << 8);
 unsigned int sound = 0x00;
 unsigned int sweep = 0x1;
 
+int holdnote = 0;
 int extendcount = 0;
 int cyclecount = 0;
 int bitcount = 0;
@@ -38,7 +39,7 @@ void specialdelay(int cyc) {
 
 /* Interrupt Service Routine */
 void user_isr(void) {
-    //if (extendcount >= 100) {
+    if (extendcount >= 100) {
         if (cyclecount % 2 == 0) {
             PORTDCLR = BCLK; // switch Bit-Clock OFF
             
@@ -64,13 +65,16 @@ void user_isr(void) {
                 bitcount = 0x80;
 
                 // Read&load new sound-int value (will be replaced with reading from microphone)
-                if (sound == hi) {
-                    sound = lo;
+                if (holdnote >= 0) {
+                    if (sound == hi) {
+                        sound = lo;
+                    }
+                    else {
+                        sound = hi;
+                    }
+                    holdnote = 0;
                 }
-                else {
-                    sound = hi;
-                }
-
+                holdnote++;
                 // load in sound
             }
 
@@ -88,9 +92,9 @@ void user_isr(void) {
             PORTDSET = BCLK; // switch Bit-Clock ON
         }
         cyclecount++;
-        //extendcount = 0;
-    //}
-    //extendcount++;
+        extendcount = 0;
+    }
+    extendcount++;
 
     IFS(0) &= ~0x100; // clear timer2 interrupt flag
 
@@ -100,13 +104,13 @@ void user_isr(void) {
     //sound = ADC1BUF0; // not sure how this is related to the thing above^
 
     // if (300 < sound < 400) { sound = 0;} // to avoid background noise
-    /*
+    
     time2string(textstring, sound);
     display_string(3, textstring);
     time2string(textstring, cyclecount);
     display_string(1, textstring);
     display_update();
-    */
+    
 
     return;
 }
@@ -133,7 +137,7 @@ void labinit(void)
 
     // Establish Timer2
     T2CONCLR = (0x1 << 15); // set timer to off
-    T2CONCLR = (0x7 << 4); // set prescale value to 1:256 (1:1)
+    T2CONSET = (0x7 << 4); // set prescale value to 1:256 (1:1)
     PR2 = TMR2PERIOD; //  Set period in Hz
     TMR2 = 0; // reset current value
     T2CONSET = (0x1 << 15); // start timer

@@ -193,54 +193,102 @@ static void num32asc( char * s, int n )
     *s++ = "0123456789ABCDEF"[ (n >> i) & 15 ];
 }
 
-/*
- * nextprime
- * 
- * Return the first prime number larger than the integer
- * given as a parameter. The integer must be positive.
- */
-#define PRIME_FALSE   0     /* Constant to help readability. */
-#define PRIME_TRUE    1     /* Constant to help readability. */
-int nextprime( int inval )
-{
-   register int perhapsprime = 0; /* Holds a tentative prime while we check it. */
-   register int testfactor; /* Holds various factors for which we test perhapsprime. */
-   register int found;      /* Flag, false until we find a prime. */
+/*Function that handles drawing a canvas, used for plotting graphs
+*/
 
-   if (inval < 3 )          /* Initial sanity check of parameter. */
-   {
-     if(inval <= 0) return(1);  /* Return 1 for zero or negative input. */
-     if(inval == 1) return(2);  /* Easy special case. */
-     if(inval == 2) return(3);  /* Easy special case. */
-   }
-   else
-   {
-     /* Testing an even number for primeness is pointless, since
-      * all even numbers are divisible by 2. Therefore, we make sure
-      * that perhapsprime is larger than the parameter, and odd. */
-     perhapsprime = ( inval + 1 ) | 1 ;
-   }
-   /* While prime not found, loop. */
-   for( found = PRIME_FALSE; found != PRIME_TRUE; perhapsprime += 2 )
-   {
-     /* Check factors from 3 up to perhapsprime/2. */
-     for( testfactor = 3; testfactor <= (perhapsprime >> 1) + 1; testfactor += 1 )
-     {
-       found = PRIME_TRUE;      /* Assume we will find a prime. */
-       if( (perhapsprime % testfactor) == 0 ) /* If testfactor divides perhapsprime... */
-       {
-         found = PRIME_FALSE;   /* ...then, perhapsprime was non-prime. */
-         goto check_next_prime; /* Break the inner loop, go test a new perhapsprime. */
-       }
-     }
-     check_next_prime:;         /* This label is used to break the inner loop. */
-     if( found == PRIME_TRUE )  /* If the loop ended normally, we found a prime. */
-     {
-       return( perhapsprime );  /* Return the prime we found. */
-     } 
-   }
-   return( perhapsprime );      /* When the loop ends, perhapsprime is a real prime. */
-} 
+static uint8_t canvas[128 * 4] = { 0 }; // 128*32
+
+void draw_pixel(unsigned int x, unsigned int y) {
+	short xVal = y / 8;
+	canvas[xVal * 128 + x] |= 1 << (y % 8);
+}
+
+/* display the current canvas where each bit represents a pixel on the screen */
+void display_canvas() {
+	int i, j;
+
+	for (i = 0; i < 4; i++) {
+		DISPLAY_CHANGE_TO_COMMAND_MODE;
+
+		spi_send_recv(0x22); // Set page
+		spi_send_recv(i); // page num
+
+		//  Start at the left column
+		spi_send_recv(0x00); // set horiz 
+		spi_send_recv(0x10); // 1st column?
+
+		DISPLAY_CHANGE_TO_DATA_MODE;
+
+		for (j = 0; j < 128; j++)
+			spi_send_recv(canvas[i * 128 + j]);
+	}
+}
+
+void scroll_display_canvas() {
+	int i, j;
+
+	for (i = 0; i < 4; i++) {
+		DISPLAY_CHANGE_TO_COMMAND_MODE;
+
+		spi_send_recv(0x22);
+		spi_send_recv(i);
+
+		spi_send_recv(0x00);
+		spi_send_recv(0x10);
+
+		DISPLAY_CHANGE_TO_DATA_MODE;
+
+		for (j = (i+1); j < 128; j++)
+			spi_send_recv(canvas[i * 128 + j]);
+	}
+}
+
+void scroll_canvas() {
+	int i,j,m;
+
+	
+	for (i = 4; i <= 0; i--) {
+		for (j = 128; j < 0; j--) {
+			m = (0xi0 & canvas[i * 128 + j]);
+			canvas[i * 128 + j] = (i << canvas[i * 128 + j]);
+		}
+	}
+
+}
+
+private static byte ConvertBoolArrayToByte(bool[] source)
+{
+	byte result = 0;
+	// This assumes the array never contains more than 8 elements!
+	int index = 8 - source.Length;
+
+	// Loop through the array
+	foreach(bool b in source)
+	{
+		// if the element is 'true' set the bit at that position
+		if (b)
+			result |= (byte)(1 << (7 - index));
+
+		index++;
+	}
+
+	return result;
+}
+
+private static bool[] ConvertByteToBoolArray(byte b)
+{
+	// prepare the return result
+	bool[] result = new bool[8];
+
+	// check each bit in the byte. if 1 set to true, if 0 set to false
+	for (int i = 0; i < 8; i++)
+		result[i] = (b & (1 << i)) == 0 ? false : true;
+
+	// reverse the array
+	Array.Reverse(result);
+
+	return result;
+}
 
 /*
  * itoa

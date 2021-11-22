@@ -29,7 +29,7 @@ const int WSEL = (0x4 << 8);
 unsigned int sound = 0x00;
 
 // Global counters
-unsigned int graph_counter = 0;
+unsigned int graph_counter = 0; // remove
 int holdnote = 0;
 int extendcount = 0;
 int cyclecount = 0;
@@ -37,18 +37,30 @@ int bitcount = 0;
 
 // Graphics related constants
 char textstring[] = "text";
+uint8_t analogarr[128] = { 0 };
 
-
-
-/* Plot all pixels in the graph */
+/* Plot all pixels in the graph and scroll if array is full */
 void graph_analog(unsigned int a) {
-    draw_pixel((graph_counter % 128), (0x3e0 & a) >> 5); //only get upper 5 bits
-        graph_counter++;
+    int i;
+    clear_canvas(); //clears all previously held values in the canvas
 
-    if (graph_counter >= 128) {
-        scroll_canvas();
+    if (graph_counter > 127) {
+        for (i = 0; i < 127; i++) {
+            analogarr[i] = analogarr[i + 1];
+        }
+        analogarr[127] =  ((0x3e0 & a) >> 5 ); // only store 5 MSB
     }
-    display_canvas();
+    else {
+        analogarr[graph_counter] = ((0x3e0 & a) >> 5 ); // only store 5 MSB
+        graph_counter++;
+    }
+
+    for (i = 0; i < 128; i++) {
+        if (analogarr[i] != 0) {
+            draw_pixel(i, analogarr[i]);
+        }
+    }
+    display_canvas(); // displays current canvas arr
 }
 
 /* Manually sample the 1st value in the */
@@ -161,7 +173,7 @@ void labinit(void)
 
     // Establish Timer2
     T2CONCLR = (0x1 << 15); // set timer to off
-    T2CONSET = (0x7 << 4); // set prescale value to 1:256 (SET) (1:1) (CLR)
+    T2CONCLR = (0x7 << 4); // set prescale value to 1:256 (SET) (1:1) (CLR)
     PR2 = TMR2PERIOD; //  Set period in Hz
     TMR2 = 0; // reset current value
     T2CONSET = (0x1 << 15); // start timer
@@ -174,10 +186,10 @@ void labinit(void)
     // HANDLE ANALOG INPUT
 
     /* PORTB.4 is analog pin A1*/
-	AD1PCFG = ~(1 << 2);
-	TRISBSET = (1 << 2);
+	AD1PCFG = ~(1 << 4);
+	TRISBSET = (1 << 4);
 	/* Use pin 2 for positive */
-	AD1CHS = (0x2 << 16); // 16->17
+	AD1CHS = (0x2 << 17); // 16->17
 
     /* Data format in uint32, 0 - 1024
     Manual sampling, auto conversion when sampling is done

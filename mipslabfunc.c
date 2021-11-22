@@ -192,51 +192,12 @@ void display_canvas() {
 	}
 }
 
-void scroll_canvas() {
-	int i,j,m;
-
-	
-	for (i = 4; i <= 0; i--) {
-		for (j = 128; j < 0; j--) {
-			m = (0xi0 & canvas[i * 128 + j]);
-			canvas[i * 128 + j] = (i << canvas[i * 128 + j]);
-		}
+/* TEMPORARY */
+void clear_canvas() {
+	int i;
+	for (i = 0; i < (128 * 4); i++) {
+		canvas[i] = 0;
 	}
-
-}
-
-private static byte ConvertBoolArrayToByte(bool[] source)
-{
-	byte result = 0;
-	// This assumes the array never contains more than 8 elements!
-	int index = 8 - source.Length;
-
-	// Loop through the array
-	foreach(bool b in source)
-	{
-		// if the element is 'true' set the bit at that position
-		if (b)
-			result |= (byte)(1 << (7 - index));
-
-		index++;
-	}
-
-	return result;
-}
-
-private static bool[] ConvertByteToBoolArray(byte b)
-{
-	// prepare the return result
-	bool[] result = new bool[8];
-
-	// check each bit in the byte. if 1 set to true, if 0 set to false
-	for (int i = 0; i < 8; i++)
-		result[i] = (b & (1 << i)) == 0 ? false : true;
-
-	// reverse the array
-	Array.Reverse(result);
-
-	return result;
 }
 
 /*

@@ -14,13 +14,12 @@ uint8_t spi_send_recv(uint8_t data);
 // NEW
 void draw_pixel(unsigned int x, unsigned int y);
 void display_canvas(void);
-void scroll_canvas(void);
+void clear_canvas(void);
 
 /* Declare lab-related functions from Render.c */
 char * itoaconv( int num );
 void labwork(void);
 void quicksleep(int cyc);
-void tick( unsigned int * timep );
 
 /* Declare display_debug - a function to help debugging.
 

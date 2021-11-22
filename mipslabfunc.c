@@ -32,40 +32,6 @@ void quicksleep(int cyc) {
 	for(i = cyc; i > 0; i--);
 }
 
-/* tick:
-   Add 1 to time in memory, at location pointed to by parameter.
-   Time is stored as 4 pairs of 2 NBCD-digits.
-   1st pair (most significant byte) counts days.
-   2nd pair counts hours.
-   3rd pair counts minutes.
-   4th pair (least significant byte) counts seconds.
-   In most labs, only the 3rd and 4th pairs are used. */
-void tick( unsigned int * timep )
-{
-  /* Get current value, store locally */
-  register unsigned int t = * timep;
-  t += 1; /* Increment local copy */
-  
-  /* If result was not a valid BCD-coded time, adjust now */
-
-  if( (t & 0x0000000f) >= 0x0000000a ) t += 0x00000006;
-  if( (t & 0x000000f0) >= 0x00000060 ) t += 0x000000a0;
-  /* Seconds are now OK */
-
-  if( (t & 0x00000f00) >= 0x00000a00 ) t += 0x00000600;
-  if( (t & 0x0000f000) >= 0x00006000 ) t += 0x0000a000;
-  /* Minutes are now OK */
-
-  if( (t & 0x000f0000) >= 0x000a0000 ) t += 0x00060000;
-  if( (t & 0x00ff0000) >= 0x00240000 ) t += 0x00dc0000;
-  /* Hours are now OK */
-
-  if( (t & 0x0f000000) >= 0x0a000000 ) t += 0x06000000;
-  if( (t & 0xf0000000) >= 0xa0000000 ) t = 0;
-  /* Days are now OK */
-
-  * timep = t; /* Store new value */
-}
 
 /* display_debug
    A function to help debugging.
@@ -193,17 +159,19 @@ static void num32asc( char * s, int n )
     *s++ = "0123456789ABCDEF"[ (n >> i) & 15 ];
 }
 
-/*Function that handles drawing a canvas, used for plotting graphs
-*/
 
-static uint8_t canvas[128 * 4] = { 0 }; // 128*32
+/* OLED DISPLAY FUNCTIONS */
+/* Function that handles drawing a canvas, used for plotting graphs */
 
+static uint8_t canvas[128 * 4] = { 0 }; // 128*32 (represents pixel grid as an array of unsigned 8-bit integers)
+
+/* sets the pixel at the specified row and column to "ON" */
 void draw_pixel(unsigned int x, unsigned int y) {
 	short xVal = y / 8;
 	canvas[xVal * 128 + x] |= 1 << (y % 8);
 }
 
-/* display the current canvas where each bit represents a pixel on the screen */
+/* display the current saved canvas where each bit represents a pixel on the screen */
 void display_canvas() {
 	int i, j;
 
@@ -220,25 +188,6 @@ void display_canvas() {
 		DISPLAY_CHANGE_TO_DATA_MODE;
 
 		for (j = 0; j < 128; j++)
-			spi_send_recv(canvas[i * 128 + j]);
-	}
-}
-
-void scroll_display_canvas() {
-	int i, j;
-
-	for (i = 0; i < 4; i++) {
-		DISPLAY_CHANGE_TO_COMMAND_MODE;
-
-		spi_send_recv(0x22);
-		spi_send_recv(i);
-
-		spi_send_recv(0x00);
-		spi_send_recv(0x10);
-
-		DISPLAY_CHANGE_TO_DATA_MODE;
-
-		for (j = (i+1); j < 128; j++)
 			spi_send_recv(canvas[i * 128 + j]);
 	}
 }

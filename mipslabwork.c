@@ -14,29 +14,33 @@
 #error "Timer period overflow."
 #endif
 
+// I2S bus-related constants
 const int hi = 0x00;
 const int lo = 0x00;
 const int DinMSB = 0x200;
 const int I2Sextend = 1;
 
+//pins 2,7,8 as output
 const int DIN = (0x1 << 8);
 const int BCLK = (0x2 << 8);
 const int WSEL = (0x4 << 8);
 
+// Analog input
 unsigned int sound = 0x00;
-unsigned int graph_counter = 0;
 
+// Global counters
+unsigned int graph_counter = 0;
 int holdnote = 0;
 int extendcount = 0;
 int cyclecount = 0;
 int bitcount = 0;
+
+// Graphics related constants
 char textstring[] = "text";
 
-void specialdelay(int cyc) {
-    volatile int i;
-    for (i = cyc; i > 0; i--);
-}
 
+
+/* Plot all pixels in the graph */
 void graph_analog(unsigned int a) {
     draw_pixel((graph_counter % 128), (0x3e0 & a) >> 5); //only get upper 5 bits
         graph_counter++;
@@ -47,7 +51,7 @@ void graph_analog(unsigned int a) {
     display_canvas();
 }
 
-
+/* Manually sample the 1st value in the */
 void manualsample() {
     AD1CON1 |= (0x1 << 1); //SAMP
     while (!(AD1CON1 & (0x1 << 1))); // SAMP
@@ -57,6 +61,9 @@ void manualsample() {
 
 /* Interrupt Service Routine */
 void user_isr(void) {
+
+    /* Handles I2S bus encoding*/
+    // I should make this into its own function.... 
     if (extendcount >= I2Sextend) {
         if (cyclecount % 2 == 0) {
             PORTDCLR = BCLK; // switch Bit-Clock OFF
@@ -127,7 +134,8 @@ void user_isr(void) {
     IFS(0) &= ~0x100; // clear timer2 interrupt flag
     
 
-
+    // update visuals here, (better to use a clock interrupt that happens more infrequently, check for the flag, then deal with it)
+    // short term solution
     /*
     time2string(textstring, sound);
     display_string(3, textstring);
@@ -135,8 +143,6 @@ void user_isr(void) {
     display_string(1, textstring);
     display_update();
     */
-    
-    
     return;
 }
 
@@ -147,9 +153,11 @@ void labinit(void)
     TRISE &= ~0xff;
     PORTE &= ~0xff;
     
+
     // Establish I2S outputs
     PORTDCLR = (0x7 << 8); // clr RD8,9,10
     TRISD &= ~(0x7 << 8); // set to ^ to output
+
 
     // Establish Timer2
     T2CONCLR = (0x1 << 15); // set timer to off
@@ -160,6 +168,8 @@ void labinit(void)
     enable_interrupt();
     IEC(0) = 0x100; // timer2 interrupt enable
     IPC(2) = 0x1C; // priority
+
+
 
     // HANDLE ANALOG INPUT
 

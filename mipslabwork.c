@@ -15,7 +15,7 @@
 #endif
 
 // I2S bus-related constants
-const int hi = 0x00;
+const int hi = 0xA0;
 const int lo = 0x00;
 const int DinMSB = 0x200;
 const int I2Sextend = 1;
@@ -71,15 +71,12 @@ void manualsample() {
     sound = ADC1BUF0; // not sure how this is related to the thing above^
 }
 
-/* Interrupt Service Routine */
-void user_isr(void) {
-
+void i2s_output(void) {
     /* Handles I2S bus encoding*/
-    // I should make this into its own function.... 
     if (extendcount >= I2Sextend) {
         if (cyclecount % 2 == 0) {
             PORTDCLR = BCLK; // switch Bit-Clock OFF
-            
+
             if (cyclecount % 16 == 0) {
                 // PORTD = !WSEL; // switch Word-Select bit
                 if ((PORTD & WSEL) == 0) {
@@ -105,25 +102,10 @@ void user_isr(void) {
                 AD1CON1 |= (0x1 << 1); //SAMP
                 while (!(AD1CON1 & (0x1 << 1))); // SAMP
                 while (!(AD1CON1 & 0x1)); // DONE
-                sound = ADC1BUF0;
+                sound = hi;
 
-                //graph values
-                graph_analog(sound);
-
-                /*
-                if (holdnote >= 0) {
-                    if (sound == hi) {
-                        sound = lo;
-                    }
-                    else {
-                        sound = hi;
-                    }
-                    holdnote = 0;
-                }
-                holdnote++;
-                */
-                // load in sound
-                
+                // graph values
+                graph_analog(ADC1BUF0);
             }
 
             // set D-in bit (MSB-> LSB)
@@ -143,9 +125,10 @@ void user_isr(void) {
         extendcount = 0;
     }
     extendcount++;
-    IFS(0) &= ~0x100; // clear timer2 interrupt flag
-    
+}
 
+/* Interrupt Service Routine */
+void user_isr(void) {
     // update visuals here, (better to use a clock interrupt that happens more infrequently, check for the flag, then deal with it)
     // short term solution
     /*
@@ -157,6 +140,8 @@ void user_isr(void) {
     */
     return;
 }
+
+
 
 /* Lab-specific initialization goes here */
 void labinit(void)
@@ -176,12 +161,12 @@ void labinit(void)
     T2CONCLR = (0x7 << 4); // set prescale value to 1:256 (SET) (1:1) (CLR)
     PR2 = TMR2PERIOD; //  Set period in Hz
     TMR2 = 0; // reset current value
+    //enable_interrupt(); //TRY TO DISABLE???
+    //IEC(0) = 0x100; // timer2 interrupt enable
+    //IPC(2) = 0x1C; // priority
     T2CONSET = (0x1 << 15); // start timer
-    enable_interrupt();
-    IEC(0) = 0x100; // timer2 interrupt enable
-    IPC(2) = 0x1C; // priority
 
-
+    
 
     // HANDLE ANALOG INPUT
 
@@ -210,4 +195,9 @@ void labinit(void)
 
 /* This function is called repetitively from the main program */
 void labwork(void) {
+    if (TMR2 == 0) {
+        i2s_output();
+        IFS(0) &= ~0x100;
+    }
+    return;
 }

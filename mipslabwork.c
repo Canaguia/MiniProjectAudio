@@ -9,14 +9,14 @@
 
 
 // DEFINE CONSTANTS
-#define TMR2PERIOD ((80000000/1)/(8*2*2*16000)) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz (/8000 and 1:1) (now /128000 8khz) 
+#define TMR2PERIOD ((80000000/1)/(8*2*2*16000)) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz (/8000 and 1:1) (now /128000 8khz) (8*2*2*16000)(80000000/256)/100)
 #if TMR2PERIOD > 0xffff
 #error "Timer period overflow."
 #endif
 
 // I2S bus-related constants
-const int hi = 0xA0;
-const int lo = 0x00;
+const int hi = 0x3FF;
+const int lo = 0x1FF;
 const int DinMSB = 0x200;
 const int I2Sextend = 1;
 
@@ -34,10 +34,13 @@ int holdnote = 0;
 int extendcount = 0;
 int cyclecount = 0;
 int bitcount = 0;
+int frequencyCounter = 0;
+int frequencyValue = 1000;
 
 // Graphics related constants
 char textstring[] = "text";
 uint8_t analogarr[128] = { 0 };
+uint8_t I2S_DEBUG = 0;
 
 /* Plot all pixels in the graph and scroll if array is full */
 void graph_analog(unsigned int a) {
@@ -72,6 +75,17 @@ void manualsample() {
 }
 
 void i2s_output(void) {
+    // Debugging mode
+    if (I2S_DEBUG) {
+        time2string(textstring, sound); //sound
+        display_string(3, textstring);
+        time2string(textstring, cyclecount); //cycle
+        display_string(1, textstring);
+        display_update();
+        quicksleep(1000000);
+    }
+
+
     /* Handles I2S bus encoding*/
     if (extendcount >= I2Sextend) {
         if (cyclecount % 2 == 0) {
@@ -98,14 +112,32 @@ void i2s_output(void) {
                 //slct = 1 << (bits - 1);
                 bitcount = DinMSB;
 
+                
                 // Read&load new sound-int value
                 AD1CON1 |= (0x1 << 1); //SAMP
                 while (!(AD1CON1 & (0x1 << 1))); // SAMP
                 while (!(AD1CON1 & 0x1)); // DONE
-                sound = hi;
+                sound = ADC1BUF0; // ADC1BUF0
+
+
+                
+                frequencyValue = 1000*sound;
+
+                frequencyCounter++;
+                if (frequencyCounter >= frequencyValue) {
+                    if (sound == hi) {
+                        sound = lo;
+                    }
+                    else {
+                        sound = hi;
+                    }
+                    frequencyCounter = 0;
+                }
+
+                 
 
                 // graph values
-                graph_analog(ADC1BUF0);
+                //graph_analog(sound);
             }
 
             // set D-in bit (MSB-> LSB)
@@ -129,19 +161,8 @@ void i2s_output(void) {
 
 /* Interrupt Service Routine */
 void user_isr(void) {
-    // update visuals here, (better to use a clock interrupt that happens more infrequently, check for the flag, then deal with it)
-    // short term solution
-    /*
-    time2string(textstring, sound);
-    display_string(3, textstring);
-    time2string(textstring, cyclecount);
-    display_string(1, textstring);
-    display_update();
-    */
     return;
 }
-
-
 
 /* Lab-specific initialization goes here */
 void labinit(void)
@@ -161,7 +182,7 @@ void labinit(void)
     T2CONCLR = (0x7 << 4); // set prescale value to 1:256 (SET) (1:1) (CLR)
     PR2 = TMR2PERIOD; //  Set period in Hz
     TMR2 = 0; // reset current value
-    //enable_interrupt(); //TRY TO DISABLE???
+    //enable_interrupt(); //Disabled
     //IEC(0) = 0x100; // timer2 interrupt enable
     //IPC(2) = 0x1C; // priority
     T2CONSET = (0x1 << 15); // start timer
@@ -197,7 +218,6 @@ void labinit(void)
 void labwork(void) {
     if (TMR2 == 0) {
         i2s_output();
-        IFS(0) &= ~0x100;
     }
     return;
 }

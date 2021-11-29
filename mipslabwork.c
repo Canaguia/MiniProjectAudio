@@ -15,15 +15,18 @@
 #endif
 
 // I2S bus-related constants
-const int hi = 0x3FF;
-const int lo = 0x1FF;
-const int DinMSB = 0x200;
+const int hi = 50; // 50 in 8-bit
+const int lo = 206; //-50 in 8-bit *(twos-complement)
+const int DinMSB = 0x80; // 8th bit select
 const int I2Sextend = 1;
 
+// Analog output
+int frequencyValue = 1000;
+
 //pins 2,7,8 as output
-const int DIN = (0x1 << 8);
-const int BCLK = (0x2 << 8);
-const int WSEL = (0x4 << 8);
+const int DIN = (0x1 << 8); // pin 2
+const int BCLK = (0x2 << 8); // pin 7
+const int WSEL = (0x4 << 8); // pin 8
 
 // Analog input
 unsigned int sound = 0x00;
@@ -35,7 +38,7 @@ int extendcount = 0;
 int cyclecount = 0;
 int bitcount = 0;
 int frequencyCounter = 0;
-int frequencyValue = 1000;
+int sineCounter = 0;
 
 // Graphics related constants
 char textstring[] = "text";
@@ -85,26 +88,27 @@ void i2s_output(void) {
         quicksleep(1000000);
     }
 
-
     /* Handles I2S bus encoding*/
     if (extendcount >= I2Sextend) {
         if (cyclecount % 2 == 0) {
             PORTDCLR = BCLK; // switch Bit-Clock OFF
 
-            if (cyclecount % 16 == 0) {
-                // PORTD = !WSEL; // switch Word-Select bit
+            if (cyclecount %16 == 0) {
+                // switch Word-Select bit
                 if ((PORTD & WSEL) == 0) {
                     PORTDSET = WSEL;
                 }
                 else {
                     PORTDCLR = WSEL;
                 }
-                // reset bit selector
-                bitcount = DinMSB;
 
                 if (cyclecount % 32 == 0) {
                     cyclecount = 0; // marks the end of a double-mono cycle
                 }
+            }
+            else if (cyclecount == 18) {
+                // reset bit selector (offset by 2 for LSB and flushing)
+                bitcount = DinMSB;
             }
             else if (cyclecount == 2) {
                 // reset bit selector
@@ -118,26 +122,29 @@ void i2s_output(void) {
                 while (!(AD1CON1 & (0x1 << 1))); // SAMP
                 while (!(AD1CON1 & 0x1)); // DONE
                 sound = ADC1BUF0; // ADC1BUF0
-
-
                 
-                frequencyValue = 1000*sound;
+                frequencyValue = 100*sound;
 
                 frequencyCounter++;
                 if (frequencyCounter >= frequencyValue) {
+                    /*
+                    sound = sine[sineCounter];
+                    sineCounter++;
+                    frequencyCounter = 0;
+                    if (sineCounter >= 400) {
+                        sineCounter = 0;
+                    }
+                    */
                     if (sound == hi) {
                         sound = lo;
                     }
                     else {
                         sound = hi;
                     }
-                    frequencyCounter = 0;
+
                 }
-
-                 
-
                 // graph values
-                //graph_analog(sound);
+                // graph_analog(sound);
             }
 
             // set D-in bit (MSB-> LSB)
@@ -192,10 +199,10 @@ void labinit(void)
     // HANDLE ANALOG INPUT
 
     /* PORTB.4 is analog pin A1*/
-	AD1PCFG = ~(1 << 4);
-	TRISBSET = (1 << 4);
+	AD1PCFG = ~(1 << 2);
+	TRISBSET = (1 << 2);
 	/* Use pin 2 for positive */
-	AD1CHS = (0x2 << 17); // 16->17
+	AD1CHS = (0x2 << 16); // 16->17
 
     /* Data format in uint32, 0 - 1024
     Manual sampling, auto conversion when sampling is done

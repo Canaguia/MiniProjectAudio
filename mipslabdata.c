@@ -161,3 +161,385 @@ const uint8_t const icon[] = {
 };
 
 const uint8_t const icon2[] = { 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x03,0x02,0x02,0x02,0x03,0x00,0x00,0x00,0x00,0x00,0x03,0x06,0x08,0x0f,0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x80,0xc0,0x40,0x40,0x40,0xc0,0x00,0x00,0x00,0x00,0x00,0x80,0x80,0x80,0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x0c,0x18,0x10,0x30,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x30,0x10,0x18,0x0c,0x06,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
+
+const uint8_t const balloon[] = { 0x0e,0x1f,0x1f,0x0e,0x04,0x0a,0x0e };
+
+/* Array for all the letters, numbers and stuff. */
+
+// Chars are displayed in 5x8
+// Each row represents a char.
+// Each column represents the char column that has 8 pixels/bits.
+// Left-most bit is the top-most pixel
+// Right-most bit is the bottom-most pixel
+const uint8_t const charArray[185] = {
+    0xFC, 0x12, 0x12, 0x12, 0xFC, // A
+    0xFE, 0x92, 0x92, 0x92, 0x6C, // B
+    0x7C, 0x82, 0x82, 0x82, 0x44, // C
+    0xFE, 0x82, 0x82, 0x82, 0x7C, // D
+    0xFE, 0x92, 0x92, 0x92, 0x92, // E
+    0xFE, 0x12, 0x12, 0x12, 0x2,  // F
+    0x7C, 0x82, 0x82, 0xA2, 0x64, // G
+    0xFE, 0x10, 0x10, 0x10, 0xFE, // H
+    0x0, 0x82, 0xFE, 0x82, 0x0,   // I
+    0x40, 0x80, 0x82, 0x7E, 0x2,  // J
+
+    0x0, 0x0, 0x0, 0x0, 0x0, // K
+
+    0xFE, 0x80, 0x80, 0x80, 0x80, // L
+    0xFE, 0x4, 0x18, 0x4, 0xFE,   // M
+    0xFE, 0x8, 0x10, 0x20, 0xFE,  // N
+    0x7C, 0x82, 0x82, 0x82, 0x7C, // O
+
+
+    0xFE, 0x12, 0x12, 0x12, 0x0C, // P 
+
+    0x0, 0x0, 0x0, 0x0, 0x0, // Q
+
+    0xFE, 0x12, 0x12, 0x12, 0xEC, // R
+    0x8C, 0x92, 0x92, 0x92, 0x62, // S
+    0x2, 0x2, 0xFE, 0x2, 0x2,     // T
+    0x7E, 0x80, 0x80, 0x80, 0x7E, // U
+    0x1E, 0x60, 0x80, 0x60, 0x1E, // V
+
+    0xFF, 0x81, 0x81, 0x81, 0xFF, // W // YOU ARE HERE!!!!
+
+    0x0, 0x0, 0x0, 0x0, 0x0, // X
+    0x6, 0x8, 0xF0, 0x8, 0x6, // Y
+    0x0, 0x0, 0x0, 0x0, 0x0, // Z
+    0x7C, 0xA2, 0x92, 0x8A, 0x7C, // 0
+    0x0, 0x84, 0xFE, 0x80, 0x0,   // 1
+    0x84, 0xC2, 0xA2, 0x92, 0x8C, // 2
+    0x42, 0x82, 0x8A, 0x96, 0x62, // 3
+    0x30, 0x28, 0x24, 0xFE, 0x20, // 4
+    0x4E, 0x8A, 0x8A, 0x8A, 0x7A, // 5
+    0x78, 0x94, 0x92, 0x92, 0x60, // 6
+    0x2, 0xE2, 0x12, 0xA, 0x6,    // 7
+    0x6C, 0x92, 0x92, 0x92, 0x6C, // 8
+    0xC, 0x92, 0x92, 0x52, 0x3C,  // 9
+    0x6C, 0x6C, 0x0, 0x0, 0x0     // :
+};
+
+// Baloon with 3HP
+void draw_balloon3(int x, int y){
+	draw_pixel(x+1, y  , 1);
+	draw_pixel(x+2, y  , 1);
+	draw_pixel(x+3, y  , 1);
+	draw_pixel(x,   y+1, 1);
+	draw_pixel(x+1, y+1, 1);
+	draw_pixel(x+2, y+1, 1);
+	draw_pixel(x+3, y+1, 1);
+	draw_pixel(x+4, y+1, 1);
+	draw_pixel(x,   y+2, 1);
+	draw_pixel(x+1, y+2, 1);
+	draw_pixel(x+2, y+2, 1);
+	draw_pixel(x+3, y+2, 1);
+	draw_pixel(x+4, y+2, 1);
+	draw_pixel(x+1, y+3, 1);
+	draw_pixel(x+2, y+3, 1);
+	draw_pixel(x+3, y+3, 1);
+	draw_pixel(x+2, y+4, 1);
+	draw_pixel(x+2, y+4, 1);
+	draw_pixel(x+1, y+5, 1);
+	draw_pixel(x+3, y+5, 1);
+	draw_pixel(x+1, y+6, 1);
+	draw_pixel(x+2, y+6, 1);
+	draw_pixel(x+3, y+6, 1);
+}
+
+// Baloon with 2HP
+void draw_balloon2(int x, int y){
+	draw_pixel(x+1, y  , 1);
+	draw_pixel(x+2, y  , 1);
+	draw_pixel(x+3, y  , 1);
+	draw_pixel(x,   y+1, 1);
+	draw_pixel(x+4, y+1, 1);
+	draw_pixel(x,   y+2, 1);
+	draw_pixel(x+1, y+2, 1);
+	draw_pixel(x+2, y+2, 1);
+	draw_pixel(x+3, y+2, 1);
+	draw_pixel(x+4, y+2, 1);
+	draw_pixel(x+1, y+3, 1);
+	draw_pixel(x+2, y+3, 1);
+	draw_pixel(x+3, y+3, 1);
+	draw_pixel(x+2, y+4, 1);
+	draw_pixel(x+2, y+4, 1);
+	draw_pixel(x+1, y+5, 1);
+	draw_pixel(x+3, y+5, 1);
+	draw_pixel(x+1, y+6, 1);
+	draw_pixel(x+2, y+6, 1);
+	draw_pixel(x+3, y+6, 1);
+}
+
+// Baloon with 1HP
+void draw_balloon1(int x, int y){
+	draw_pixel(x+1, y  , 1);
+	draw_pixel(x+2, y  , 1);
+	draw_pixel(x+3, y  , 1);
+	draw_pixel(x,   y+1, 1);
+	draw_pixel(x+4, y+1, 1);
+	draw_pixel(x,   y+2, 1);
+	draw_pixel(x+4, y+2, 1);
+	draw_pixel(x+1, y+3, 1);
+	draw_pixel(x+3, y+3, 1);
+	draw_pixel(x+2, y+4, 1);
+	draw_pixel(x+2, y+4, 1);
+	draw_pixel(x+1, y+5, 1);
+	draw_pixel(x+3, y+5, 1);
+	draw_pixel(x+1, y+6, 1);
+	draw_pixel(x+2, y+6, 1);
+	draw_pixel(x+3, y+6, 1);
+}
+
+// Baloon POPPING 0HP!
+void draw_balloon0(int x, int y){
+	draw_pixel(x+1, y  , 1);
+	draw_pixel(x+5, y  , 1);
+	draw_pixel(x,   y+2, 1);
+	draw_pixel(x+3, y+2, 1);
+	draw_pixel(x+6, y+2, 1);
+	draw_pixel(x+1, y+4, 1);
+	draw_pixel(x+3, y+4, 1);
+	draw_pixel(x+5, y+4, 1);
+	draw_pixel(x+2, y+5, 1);
+	draw_pixel(x+4, y+5, 1);
+	draw_pixel(x+2, y+6, 1);
+	draw_pixel(x+3, y+6, 1);
+	draw_pixel(x+4, y+6, 1);
+}
+
+// Baloon POPPING 0HP!
+void draw_bird(int x, int y){
+	draw_pixel(x+3, y  , 1);
+	draw_pixel(x+4, y  , 1);
+	draw_pixel(x+5, y  , 1);
+	draw_pixel(x+6, y  , 1);
+
+	draw_pixel(x+2, y+1, 1);
+	draw_pixel(x+3, y+1, 1);
+	draw_pixel(x+5, y+1, 1);
+
+	draw_pixel(x+3, y+2, 1);
+	draw_pixel(x+4, y+2, 1);
+	draw_pixel(x+5, y+2, 1);
+
+	draw_pixel(x+6, y+3, 1);
+
+	draw_pixel(x+4, y+4, 1);
+	draw_pixel(x+5, y+4, 1);
+	draw_pixel(x+6, y+4, 1);
+	draw_pixel(x+7, y+4, 1);
+
+	draw_pixel(x  , y+5, 1);
+	draw_pixel(x+4, y+5, 1);
+	draw_pixel(x+5, y+5, 1);
+	draw_pixel(x+6, y+5, 1);
+	draw_pixel(x+7, y+5, 1);
+
+	draw_pixel(x  , y+6, 1);
+	draw_pixel(x+1, y+6, 1);
+	draw_pixel(x+4, y+6, 1);
+	draw_pixel(x+5, y+6, 1);
+	draw_pixel(x+6, y+6, 1);
+
+	draw_pixel(x  , y+7, 1);
+	draw_pixel(x+1, y+7, 1);
+	draw_pixel(x+5, y+7, 1);
+
+	draw_pixel(x+1, y+8, 1);
+	draw_pixel(x+2, y+8, 1);
+	draw_pixel(x+4, y+8, 1);
+	draw_pixel(x+6, y+8, 1);
+	draw_pixel(x+8, y+8, 1);
+	draw_pixel(x+9, y+8, 1);
+	
+	draw_pixel(x+7, y+9, 1);
+}
+
+void draw_pause(int x, int y){
+	draw_pixel(x   , y  , 0);
+	draw_pixel(x+1 , y  , 0);
+	draw_pixel(x+2 , y  , 0);
+	draw_pixel(x+3 , y  , 0);
+	draw_pixel(x+7 , y  , 0);
+	draw_pixel(x+8 , y  , 0);
+	draw_pixel(x+9 , y  , 0);
+	draw_pixel(x+10, y  , 0);
+
+	draw_pixel(x   , y+1, 0);
+	draw_pixel(x+1 , y+1, 0);
+	draw_pixel(x+2 , y+1, 0);
+	draw_pixel(x+3 , y+1, 0);
+	draw_pixel(x+7 , y+1, 0);
+	draw_pixel(x+8 , y+1, 0);
+	draw_pixel(x+9 , y+1, 0);
+	draw_pixel(x+10, y+1, 0);
+
+	draw_pixel(x   , y+2, 0);
+	draw_pixel(x+1 , y+2, 0);
+	draw_pixel(x+2 , y+2, 0);
+	draw_pixel(x+3 , y+2, 0);
+	draw_pixel(x+7 , y+2, 0);
+	draw_pixel(x+8 , y+2, 0);
+	draw_pixel(x+9 , y+2, 0);
+	draw_pixel(x+10, y+2, 0);
+
+	draw_pixel(x   , y+3, 0);
+	draw_pixel(x+1 , y+3, 0);
+	draw_pixel(x+2 , y+3, 0);
+	draw_pixel(x+3 , y+3, 0);
+	draw_pixel(x+7 , y+3, 0);
+	draw_pixel(x+8 , y+3, 0);
+	draw_pixel(x+9 , y+3, 0);
+	draw_pixel(x+10, y+3, 0);
+
+	draw_pixel(x   , y+4, 0);
+	draw_pixel(x+1 , y+4, 0);
+	draw_pixel(x+2 , y+4, 0);
+	draw_pixel(x+3 , y+4, 0);
+	draw_pixel(x+7 , y+4, 0);
+	draw_pixel(x+8 , y+4, 0);
+	draw_pixel(x+9 , y+4, 0);
+	draw_pixel(x+10, y+4, 0);
+
+	draw_pixel(x   , y+5, 0);
+	draw_pixel(x+1 , y+5, 0);
+	draw_pixel(x+2 , y+5, 0);
+	draw_pixel(x+3 , y+5, 0);
+	draw_pixel(x+7 , y+5, 0);
+	draw_pixel(x+8 , y+5, 0);
+	draw_pixel(x+9 , y+5, 0);
+	draw_pixel(x+10, y+5, 0);
+
+	draw_pixel(x   , y+6, 0);
+	draw_pixel(x+1 , y+6, 0);
+	draw_pixel(x+2 , y+6, 0);
+	draw_pixel(x+3 , y+6, 0);
+	draw_pixel(x+7 , y+6, 0);
+	draw_pixel(x+8 , y+6, 0);
+	draw_pixel(x+9 , y+6, 0);
+	draw_pixel(x+10, y+6, 0);
+
+	draw_pixel(x   , y+7, 0);
+	draw_pixel(x+1 , y+7, 0);
+	draw_pixel(x+2 , y+7, 0);
+	draw_pixel(x+3 , y+7, 0);
+	draw_pixel(x+7 , y+7, 0);
+	draw_pixel(x+8 , y+7, 0);
+	draw_pixel(x+9 , y+7, 0);
+	draw_pixel(x+10, y+7, 0);
+
+	draw_pixel(x   , y+8, 0);
+	draw_pixel(x+1 , y+8, 0);
+	draw_pixel(x+2 , y+8, 0);
+	draw_pixel(x+3 , y+8, 0);
+	draw_pixel(x+7 , y+8, 0);
+	draw_pixel(x+8 , y+8, 0);
+	draw_pixel(x+9 , y+8, 0);
+	draw_pixel(x+10, y+8, 0);
+
+	draw_pixel(x   , y+9, 0);
+	draw_pixel(x+1 , y+9, 0);
+	draw_pixel(x+2 , y+9, 0);
+	draw_pixel(x+3 , y+9, 0);
+	draw_pixel(x+7 , y+9, 0);
+	draw_pixel(x+8 , y+9, 0);
+	draw_pixel(x+9 , y+9, 0);
+	draw_pixel(x+10, y+9, 0);
+
+	draw_pixel(x   , y+10, 0);
+	draw_pixel(x+1 , y+10, 0);
+	draw_pixel(x+2 , y+10, 0);
+	draw_pixel(x+3 , y+10, 0);
+	draw_pixel(x+7 , y+10, 0);
+	draw_pixel(x+8 , y+10, 0);
+	draw_pixel(x+9 , y+10, 0);
+	draw_pixel(x+10, y+10, 0);
+}
+
+void draw_play(int x, int y){
+	draw_pixel(x+1 , y  , 0);
+	draw_pixel(x+2 , y  , 0);
+
+	draw_pixel(x+0 , y+1, 0);
+	draw_pixel(x+1 , y+1, 0);
+	draw_pixel(x+2 , y+1, 0);
+	draw_pixel(x+3 , y+1, 0);
+	draw_pixel(x+4 , y+1, 0);
+
+	draw_pixel(x+0 , y+2, 0);
+	draw_pixel(x+1 , y+2, 0);
+	draw_pixel(x+2 , y+2, 0);
+	draw_pixel(x+3 , y+2, 0);
+	draw_pixel(x+4 , y+2, 0);
+	draw_pixel(x+5 , y+2, 0);
+
+	draw_pixel(x+0 , y+3, 0);
+	draw_pixel(x+1 , y+3, 0);
+	draw_pixel(x+2 , y+3, 0);
+	draw_pixel(x+3 , y+3, 0);
+	draw_pixel(x+4 , y+3, 0);
+	draw_pixel(x+5 , y+3, 0);
+	draw_pixel(x+6 , y+3, 0);
+	draw_pixel(x+7 , y+3, 0);
+
+	draw_pixel(x+0 , y+4, 0);
+	draw_pixel(x+1 , y+4, 0);
+	draw_pixel(x+2 , y+4, 0);
+	draw_pixel(x+3 , y+4, 0);
+	draw_pixel(x+4 , y+4, 0);
+	draw_pixel(x+5 , y+4, 0);
+	draw_pixel(x+6 , y+4, 0);
+	draw_pixel(x+7 , y+4, 0);
+	draw_pixel(x+8 , y+4, 0);
+	draw_pixel(x+9 , y+4, 0);
+
+	draw_pixel(x+0 , y+5, 0);
+	draw_pixel(x+1 , y+5, 0);
+	draw_pixel(x+2 , y+5, 0);
+	draw_pixel(x+3 , y+5, 0);
+	draw_pixel(x+4 , y+5, 0);
+	draw_pixel(x+5 , y+5, 0);
+	draw_pixel(x+6 , y+5, 0);
+	draw_pixel(x+7 , y+5, 0);
+	draw_pixel(x+8 , y+5, 0);
+	draw_pixel(x+9 , y+5, 0);
+	draw_pixel(x+10, y+5, 0);
+
+	draw_pixel(x+0 , y+6, 0);
+	draw_pixel(x+1 , y+6, 0);
+	draw_pixel(x+2 , y+6, 0);
+	draw_pixel(x+3 , y+6, 0);
+	draw_pixel(x+4 , y+6, 0);
+	draw_pixel(x+5 , y+6, 0);
+	draw_pixel(x+6 , y+6, 0);
+	draw_pixel(x+7 , y+6, 0);
+	draw_pixel(x+8 , y+6, 0);
+	draw_pixel(x+9 , y+6, 0);
+
+	draw_pixel(x+0 , y+7, 0);
+	draw_pixel(x+1 , y+7, 0);
+	draw_pixel(x+2 , y+7, 0);
+	draw_pixel(x+3 , y+7, 0);
+	draw_pixel(x+4 , y+7, 0);
+	draw_pixel(x+5 , y+7, 0);
+	draw_pixel(x+6 , y+7, 0);
+	draw_pixel(x+7 , y+7, 0);
+
+	draw_pixel(x+0 , y+8, 0);
+	draw_pixel(x+1 , y+8, 0);
+	draw_pixel(x+2 , y+8, 0);
+	draw_pixel(x+3 , y+8, 0);
+	draw_pixel(x+4 , y+8, 0);
+	draw_pixel(x+5 , y+8, 0);
+
+	draw_pixel(x+0 , y+9, 0);
+	draw_pixel(x+1 , y+9, 0);
+	draw_pixel(x+2 , y+9, 0);
+	draw_pixel(x+3 , y+9, 0);
+	draw_pixel(x+4 , y+9, 0);
+
+	draw_pixel(x+1 , y+10, 0);
+	draw_pixel(x+2 , y+10, 0);
+}
+
+	

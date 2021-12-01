@@ -9,16 +9,44 @@ void display_image(int x, const uint8_t *data);
 void display_init(void);
 void display_string(int line, char *s);
 void display_update(void);
+
 uint8_t spi_send_recv(uint8_t data);
 
 // NEW
-void draw_pixel(unsigned int x, unsigned int y);
+uint8_t canvas[512];
+void draw_pixel(int x, int y, int colPix);
+void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t *data);
+void draw_string(uint8_t x, uint8_t y, char *str);
+void draw_int(uint8_t x, uint8_t y, int num);
 void display_canvas(void);
 void clear_canvas(void);
 
+extern uint8_t state;
+
+//Gameplay
+extern uint8_t currentY;
+extern uint8_t currentX;;
+
+void playerMovement(void);
+void playerMoveUp(void);
+void playerMoveDown(void);
+void playerMoveLeft(void);
+void playerMoveRight(void);
+
+//Game-Sprites
+void draw_balloon3(int x, int y);
+void draw_balloon2(int x, int y);
+void draw_balloon1(int x, int y);
+void draw_balloon0(int x, int y);
+void draw_bird(int x, int y);
+
+//UI-Sprites
+void draw_pause(int x, int y);
+void draw_play(int x, int y);
+
 /* Declare lab-related functions from Render.c */
 char * itoaconv( int num );
-void labwork(void);
+void gameRunning(void);
 void quicksleep(int cyc);
 
 /* Declare display_debug - a function to help debugging.
@@ -43,6 +71,9 @@ extern const uint8_t const icon[128];
 extern char textbuffer[4][16];
 
 extern const uint8_t const icon2[128];
+extern const uint8_t const balloon[128];
+extern const uint8_t const charArray[185];
+
 
 /* Declare functions written by students.
    Note: Since we declare these functions here,

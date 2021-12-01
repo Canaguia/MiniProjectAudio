@@ -11,6 +11,8 @@
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
 
+uint8_t state = 1;
+
 int main(void) {
     /*
 	  This will set the peripheral bus clock to the same frequency
@@ -53,21 +55,22 @@ int main(void) {
 	SPI2CONSET = 0x20;
 	/* SPI2CON bit ON = 1; */
 	SPI2CONSET = 0x8000;
-	
-	display_init();
-	display_string(0, "Mini Project");
-	display_string(1, "Mech Parrot");
-	display_string(2, "A0:");
-	display_string(3, "");
-	display_update();
-	
-	display_image(96, icon2);
-	
+
+
+	display_init();	
 	labinit(); /* Do any lab-specific initialization */
 
-	while( 1 )
-	{
-	  labwork(); /* Do lab-specific things again and again */
+	int getSwitch = getsw();
+
+	while(1){
+		clear_canvas();
+		if(state == 1){
+			gameStart();
+		} else if (state == 2){
+			gameRunning();
+		} else if (state == 3){
+			gamePaused();
+		}
 	}
 	return 0;
 }

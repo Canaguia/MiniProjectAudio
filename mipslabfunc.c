@@ -7,7 +7,6 @@
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
-
 /* Declare a helper function which is local to this file */
 static void num32asc( char * s, int ); 
 
@@ -22,6 +21,8 @@ static void num32asc( char * s, int );
 
 #define DISPLAY_TURN_OFF_VDD (PORTFSET = 0x40)
 #define DISPLAY_TURN_OFF_VBAT (PORTFSET = 0x20)
+
+#define CANVAS_ARRAY_SIZE 512
 
 /* quicksleep:
    A simple function to create a small delay.
@@ -63,33 +64,39 @@ uint8_t spi_send_recv(uint8_t data) {
 }
 
 void display_init(void) {
-        DISPLAY_CHANGE_TO_COMMAND_MODE;
-	quicksleep(10);
+    DISPLAY_CHANGE_TO_COMMAND_MODE;
+    quicksleep(10);
 	DISPLAY_ACTIVATE_VDD;
-	quicksleep(1000000);
-	
-	spi_send_recv(0xAE);
+    quicksleep(1000000);
+
+    spi_send_recv(0xAE);
 	DISPLAY_ACTIVATE_RESET;
-	quicksleep(10);
+    quicksleep(10);
 	DISPLAY_DO_NOT_RESET;
-	quicksleep(10);
-	
-	spi_send_recv(0x8D);
-	spi_send_recv(0x14);
-	
-	spi_send_recv(0xD9);
-	spi_send_recv(0xF1);
-	
+    quicksleep(10);
+
+    spi_send_recv(0x8D);
+    spi_send_recv(0x14);
+
+    spi_send_recv(0xD9);
+    spi_send_recv(0xF1);
+
 	DISPLAY_ACTIVATE_VBAT;
-	quicksleep(10000000);
+    quicksleep(10000000);
+
+    spi_send_recv(0xA1);
+    spi_send_recv(0xC8);
+
+    spi_send_recv(0xDA);
+    spi_send_recv(0x20);
 	
-	spi_send_recv(0xA1);
-	spi_send_recv(0xC8);
-	
-	spi_send_recv(0xDA);
 	spi_send_recv(0x20);
-	
-	spi_send_recv(0xAF);
+	spi_send_recv(0x0);
+
+    spi_send_recv(0xAF);
+	quicksleep(100);
+	/* Change to data mode */
+	DISPLAY_CHANGE_TO_DATA_MODE;
 }
 
 void display_string(int line, char *s) {
@@ -126,27 +133,34 @@ void display_image(int x, const uint8_t *data) {
 	}
 }
 
-void display_update(void) {
-	int i, j, k;
-	int c;
-	for(i = 0; i < 4; i++) {
-		DISPLAY_CHANGE_TO_COMMAND_MODE;
-		spi_send_recv(0x22);
-		spi_send_recv(i);
+// void display_update(void) {
+// 	int i, j, k;
+// 	int c;
+// 	for(i = 0; i < 4; i++) {
+// 		DISPLAY_CHANGE_TO_COMMAND_MODE;
+// 		spi_send_recv(0x22);
+// 		spi_send_recv(i);
 		
-		spi_send_recv(0x0);
-		spi_send_recv(0x10);
+// 		spi_send_recv(0x0);
+// 		spi_send_recv(0x10);
 		
-		DISPLAY_CHANGE_TO_DATA_MODE;
+// 		DISPLAY_CHANGE_TO_DATA_MODE;
 		
-		for(j = 0; j < 16; j++) {
-			c = textbuffer[i][j];
-			if(c & 0x80)
-				continue;
+// 		for(j = 0; j < 16; j++) {
+// 			c = textbuffer[i][j];
+// 			if(c & 0x80)
+// 				continue;
 			
-			for(k = 0; k < 8; k++)
-				spi_send_recv(font[c*8 + k]);
-		}
+// 			for(k = 0; k < 8; k++)
+// 				spi_send_recv(font[c*8 + k]);
+// 		}
+// 	}
+// }
+
+void display_update(void){
+	int i;
+	for(i = 0; i < CANVAS_ARRAY_SIZE; i++){
+		spi_send_recv(canvas[i]);
 	}
 }
 
@@ -163,39 +177,87 @@ static void num32asc( char * s, int n )
 /* OLED DISPLAY FUNCTIONS */
 /* Function that handles drawing a canvas, used for plotting graphs */
 
-static uint8_t canvas[128 * 4] = { 0 }; // 128*32 (represents pixel grid as an array of unsigned 8-bit integers)
+// static uint8_t canvas[128 * 4] = { 0 }; // 128*32 (represents pixel grid as an array of unsigned 8-bit integers)
 
 /* sets the pixel at the specified row and column to "ON" */
-void draw_pixel(unsigned int x, unsigned int y) {
-	short xVal = y / 8;
-	canvas[xVal * 128 + x] |= 1 << (y % 8);
+void draw_pixel(int x, int y, int colPix) {
+	if(x < 32 && x >= 0 && y < 128 && y >= 0 ){
+		int xOffset = x % 8;
+		int page = (x + 8) / 8;
+		int arrayPos = page * 128 - y;
+		canvas[arrayPos] |= 1 << xOffset;
+	}
+
+	// HANDLE COLLISIONS WITH colPix
+}
+
+void draw_string(uint8_t x, uint8_t y, char *str) {
+	const char* i;
+	int j;
+	int k = x;
+	for (i = str; *i!='\0'; i++) {
+		char c = *i;
+		/* Dont draw outside the screen */
+		if(x > 32) {
+			continue;
+		}
+		/* Space character */
+		if(c == 32) {
+			y += 4;
+			continue;
+		}
+		/* Display every hex value of a char */
+		for (j = 0; j<5; j++) {
+			/* Capital letters */
+			if(c >= 65 && c <= 90) {
+				canvas[j*128 + k + y] |= charArray[(c - 65)*5 + j];
+			/* Normal letters */
+			} else if(c >= 97 && c <= 122) {
+				canvas[j*128 + k + y] |= charArray[(c - 65 - 32)*5 + j];
+			/* Digits and colon */
+		    } else if(c >= 48 && c <= 58) {
+				canvas[j*128 + k + y] |= charArray[(c - 48 + 26)*5 + j];
+			}
+		}
+		/* Next letter and add space. */
+		y += 7;
+	}
+}
+
+void draw_int(uint8_t x, uint8_t y, int num) {
+
 }
 
 /* display the current saved canvas where each bit represents a pixel on the screen */
-void display_canvas() {
-	int i, j;
+void display_canvas(void) {
+	// int i, j;
 
-	for (i = 0; i < 4; i++) {
-		DISPLAY_CHANGE_TO_COMMAND_MODE;
+	// for (i = 0; i < 4; i++) {
+	// 	DISPLAY_CHANGE_TO_COMMAND_MODE;
 
-		spi_send_recv(0x22); // Set page
-		spi_send_recv(i); // page num
+	// 	spi_send_recv(0x22); // Set page
+	// 	spi_send_recv(i); // page num
 
-		//  Start at the left column
-		spi_send_recv(0x00); // set horiz 
-		spi_send_recv(0x10); // 1st column?
+	// 	//  Start at the left column
+	// 	spi_send_recv(0x00); // set horiz 
+	// 	spi_send_recv(0x10); // 1st column?
 
-		DISPLAY_CHANGE_TO_DATA_MODE;
+	// 	DISPLAY_CHANGE_TO_DATA_MODE;
 
-		for (j = 0; j < 128; j++)
-			spi_send_recv(canvas[i * 128 + j]);
+	// 	for (j = 0; j < 128; j++)
+	// 		spi_send_recv(canvas[i * 128 + j]);
+	// }
+
+	int i;
+	for(i = 0; i < CANVAS_ARRAY_SIZE; i++){
+		spi_send_recv(canvas[i]);
 	}
 }
 
 /* TEMPORARY */
 void clear_canvas() {
 	int i;
-	for (i = 0; i < (128 * 4); i++) {
+	for (i = 0; i < CANVAS_ARRAY_SIZE; i++) {
 		canvas[i] = 0;
 	}
 }

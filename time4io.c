@@ -8,6 +8,6 @@ int getsw(void) {
 }
 
 int getbtns(void) {
-	return (PORTD & 0xe0) >> 5;
+	return (((PORTD & 0xe0) >> 4) | ((PORTF & 0x02) >> 1));	
 }
 

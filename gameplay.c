@@ -8,17 +8,17 @@
 uint8_t currentY = 61;
 uint8_t currentX = 15;
 
-int inputcycles;
+int inputcycles = 0;
 int playerUpVelocity = 0;
 int velocityBuffer = 0;
 #define playerUpVelocity_MAX 5
-#define playerUpVelocity_MIN -2
-#define looney_Toons_Logic 10
+#define playerUpVelocity_MIN -3
+#define coyote_time 100
 
 // Analog input variables
 #define AMP_MIN 0x200 // 220 
 #define AMP_MAX 0x320  //300
-int analogIn;
+int analogIn = 0;
 
 // timer variables
 int timerCycles;
@@ -58,8 +58,6 @@ void playerMoveLeft(void){
 
 void player_input() {
     //move left, move right
-    /* --- code here ---*/
-
     int pressedBtn = getbtns();
     
     if (pressedBtn){
@@ -80,32 +78,35 @@ void player_input() {
             playerMoveRight();
         }
     }
-
+    analogIn = 0;
     analogIn = sample_analog();
+
     if (analogIn < AMP_MIN || analogIn > AMP_MAX) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
             playerUpVelocity++;
+            inputcycles = 0;
         }    
-        inputcycles = 0;
+        
     }
     else {
-        if (inputcycles > looney_Toons_Logic) {
+        if ((inputcycles > coyote_time) & (playerUpVelocity > playerUpVelocity_MIN)) {
             playerUpVelocity--;
-            inputcycles = 0;
         }
         inputcycles++;
     }
     
     // Make it so that the maximum speed is 1 pixel per frame (slowest is 1 per 5 frames)
-    if (velocityBuffer >= (playerUpVelocity_MAX - playerUpVelocity)) {
-        if (playerUpVelocity > 0) {
+    if (playerUpVelocity > 0) {
+        if (velocityBuffer >= (playerUpVelocity_MAX - playerUpVelocity)) {
             currentY--;
+            velocityBuffer = 0;
         }
-        else {
+    }
+    else {
+        if (velocityBuffer >= (playerUpVelocity - playerUpVelocity_MIN)) {
             currentY++;
+            velocityBuffer = 0;
         }
-        
-        velocityBuffer = 0;
     }
     velocityBuffer++;
 }
@@ -116,30 +117,4 @@ void entity_update() {
         (two arrays one with x values and one with y value)*/
     return;
 }
-
-
-// void playerMovement(void){
-//     int pressedBtn = getbtns();
-    
-//     if (pressedBtn){
-//         //BTN1
-//         if(pressedBtn & 1){
-//             playerMoveUp();
-//         }
-//         // BTN2
-//         if(pressedBtn & 2){
-//             playerMoveDown();
-//         }
-//         // BTN3
-//         if(pressedBtn & 4){
-//             playerMoveLeft();
-//         }
-//         // BTN4
-//         if(pressedBtn & 8){
-//             playerMoveRight();
-//         }
-//         quicksleep(100000);
-//     }
-    
-// }
 

@@ -63,14 +63,7 @@ int main(void) {
 	int getSwitch = getsw();
 
 	while(1){
-		clear_canvas();
-		if(state == 1){
-			gameStart();
-		} else if (state == 2){
-			gameRunning();
-		} else if (state == 3){
-			gamePaused();
-		}
+		masterGameLoop();
 	}
 	return 0;
 }

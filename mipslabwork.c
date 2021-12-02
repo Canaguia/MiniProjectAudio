@@ -13,147 +13,7 @@
 #error "Timer period overflow."
 #endif
 
-// I2S bus-related constants
-// const int hi = 0x3FF;
-// const int lo = 0x1FF;
-// const int DinMSB = 0x200;
-// const int I2Sextend = 1;
-
-// //pins 2,7,8 as output
-// const int DIN = (0x1 << 8);
-// const int BCLK = (0x2 << 8);
-// const int WSEL = (0x4 << 8);
-
-
-// Analog input
-// unsigned int sound = 0x00;
-
-// // Global counters
-// unsigned int graph_counter = 0; // remove
-// int holdnote = 0;
-// int extendcount = 0;
-// int cyclecount = 0;
-// int bitcount = 0;
-// int frequencyCounter = 0;
-// int frequencyValue = 1000;
-
-// // Graphics related constants
-// char textstring[] = "text";
-// uint8_t analogarr[128] = { 0 };
-// uint8_t I2S_DEBUG = 0;
-
-/* Plot all pixels in the graph and scroll if array is full */
-// void graph_analog(unsigned int a) {
-//     int i;
-//     clear_canvas(); //clears all previously held values in the canvas
-
-//     if (graph_counter > 127) {
-//         for (i = 0; i < 127; i++) {
-//             analogarr[i] = analogarr[i + 1];
-//         }
-//         analogarr[127] =  ((0x3e0 & a) >> 5 ); // only store 5 MSB
-//     }
-//     else {
-//         analogarr[graph_counter] = ((0x3e0 & a) >> 5 ); // only store 5 MSB
-//         graph_counter++;
-//     }
-
-//     for (i = 0; i < 128; i++) {
-//         if (analogarr[i] != 0) {
-//             draw_pixel(i, analogarr[i], 0);
-//         }
-//     }
-//     display_canvas(); // displays current canvas arr
-// }
-
-/* Manually sample the 1st value in the */
-// void manualsample() {
-//     AD1CON1 |= (0x1 << 1); //SAMP
-//     while (!(AD1CON1 & (0x1 << 1))); // SAMP
-//     while (!(AD1CON1 & 0x1)); // DONE
-//     sound = ADC1BUF0; // not sure how this is related to the thing above^
-// }
-
-// void i2s_output(void) {
-//     // Debugging mode
-//     if (I2S_DEBUG) {
-//         time2string(textstring, sound); //sound
-//         display_string(3, textstring);
-//         time2string(textstring, cyclecount); //cycle
-//         display_string(1, textstring);
-//         display_update();
-//         quicksleep(1000000);
-//     }
-
-
-//     /* Handles I2S bus encoding*/
-//     if (extendcount >= I2Sextend) {
-//         if (cyclecount % 2 == 0) {
-//             PORTDCLR = BCLK; // switch Bit-Clock OFF
-
-//             if (cyclecount % 16 == 0) {
-//                 // PORTD = !WSEL; // switch Word-Select bit
-//                 if ((PORTD & WSEL) == 0) {
-//                     PORTDSET = WSEL;
-//                 }
-//                 else {
-//                     PORTDCLR = WSEL;
-//                 }
-//                 // reset bit selector
-//                 bitcount = DinMSB;
-
-//                 if (cyclecount % 32 == 0) {
-//                     cyclecount = 0; // marks the end of a double-mono cycle
-//                 }
-//             }
-//             else if (cyclecount == 2) {
-//                 // reset bit selector
-//                 //bits = sizeof(uint32) * 8;
-//                 //slct = 1 << (bits - 1);
-//                 bitcount = DinMSB;
-
-                
-
-
-
-                
-//                 frequencyValue = 1000*sound;
-
-//                 frequencyCounter++;
-//                 if (frequencyCounter >= frequencyValue) {
-//                     if (sound == hi) {
-//                         sound = lo;
-//                     }
-//                     else {
-//                         sound = hi;
-//                     }
-//                     frequencyCounter = 0;
-//                 }
-
-                 
-
-//                 // graph values
-//                 //graph_analog(sound);
-//             }
-
-//             // set D-in bit (MSB-> LSB)
-//             if ((bitcount & sound) == 0) {
-//                 PORTDCLR = DIN;
-//             }
-//             else {
-//                 PORTDSET = DIN;
-//             }
-//             bitcount = bitcount >> 1;
-
-//         }
-//         else {
-//             PORTDSET = BCLK; // switch Bit-Clock ON
-//         }
-//         cyclecount++;
-//         extendcount = 0;
-//     }
-//     extendcount++;
-// }
+int cycle = 0;
 
 /* Interrupt Service Routine */
 void user_isr(void) {
@@ -163,15 +23,6 @@ void user_isr(void) {
 /* Lab-specific initialization goes here */
 void labinit(void)
 {
-    // Establish inputs
-    // TRISE &= ~0xff;
-    // PORTE &= ~0xff;
-
-    // Establish I2S outputs
-    // PORTDCLR = (0x7 << 8); // clr RD8,9,10
-    // TRISD &= ~(0x7 << 8); // set to ^ to output
-
-
     // Establish Timer2
     T2CONCLR = (0x1 << 15); // set timer to off
     T2CONSET = (0x7 << 4); // set prescale value to 1:256 (SET) (1:1) (CLR)
@@ -179,10 +30,7 @@ void labinit(void)
     TMR2 = 0; // reset current value
     T2CONSET = (0x1 << 15); // start timer
 
-    
-
     // HANDLE ANALOG INPUT
-
     /* PORTB.4 is analog pin A1*/
 	AD1PCFG = ~(1 << 4);
 	TRISBSET = (1 << 4);
@@ -200,18 +48,15 @@ void labinit(void)
     ODCE = 0x0;
     TRISESET = 0xFF;
 
-
     /* Turn on ADC */
     AD1CON1 |= (0x1 << 15);
 
     return;
 }
 
-int cycle = 0;
-
 void gameRunning(void) {
-
-    if(getsw() & 1){
+    // pause logic
+    if (getsw() & 1) {
         state = 3;
     }
 
@@ -235,7 +80,7 @@ void gameRunning(void) {
 
 void gamePaused(void) {
 
-    if(!(getsw() & 1)){
+    if (!(getsw() & 1)) {
         state = 2;
     }
 
@@ -247,19 +92,19 @@ void gamePaused(void) {
 
 void gameStart(void) {
 
-    if((cycle / 100) % 4 == 0){
+    if ((cycle / 100) % 4 == 0) {
         draw_balloon3(15, 61);
     }
-    if((cycle / 100) % 4 == 1){
+    if ((cycle / 100) % 4 == 1) {
         draw_balloon2(15, 61);
     }
-    if((cycle / 100) % 4 == 2){
+    if ((cycle / 100) % 4 == 2) {
         draw_balloon1(15, 61);
     }
-    if((cycle / 100) % 4 == 3){
+    if ((cycle / 100) % 4 == 3) {
         draw_balloon0(14, 60);
     }
-    if(cycle >= 400){
+    if (cycle >= 400) {
         cycle = 0;
     }
     cycle++;
@@ -272,9 +117,25 @@ void gameStart(void) {
 
     quicksleep(1000);
 
-    if((getbtns() & 1)){
+    if ((getbtns() & 1)) {
         state = 2;
     }
 
     return;
 }
+
+void masterGameLoop() {
+    if (TMR2 == 0) {
+        clear_canvas();
+        if (state == 1) {
+            gameStart();
+        }
+        else if (state == 2) {
+            gameRunning();
+        }
+        else if (state == 3) {
+            gamePaused();
+        }
+    }
+}
+

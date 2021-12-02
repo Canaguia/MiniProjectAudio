@@ -307,6 +307,15 @@ void draw_balloon0(int x, int y){
 	draw_pixel(x+4, y+6, 1);
 }
 
+void draw_balloonD(int x, int y) {
+	draw_pixel(x + 3, y + 4, 1);
+	draw_pixel(x + 2, y + 5, 1);
+	draw_pixel(x + 4, y + 5, 1);
+	draw_pixel(x + 2, y + 6, 1);
+	draw_pixel(x + 3, y + 6, 1);
+	draw_pixel(x + 4, y + 6, 1);
+}
+
 // Baloon POPPING 0HP!
 void draw_bird(int x, int y){
 	draw_pixel(x+3, y  , 1);

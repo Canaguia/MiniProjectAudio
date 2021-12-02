@@ -4,21 +4,29 @@
 
 
 // player variables
+#define playerSpawn_X 15
+#define playerSpawn_Y 80
 
-uint8_t currentY = 61;
-uint8_t currentX = 15;
+uint8_t currentY = playerSpawn_Y;
+uint8_t currentX = playerSpawn_X;
+uint8_t playerLives = 3;
 
 int inputcycles = 0;
 int playerUpVelocity = 0;
 int velocityBuffer = 0;
-#define playerUpVelocity_MAX 5
+#define playerUpVelocity_MAX 0
 #define playerUpVelocity_MIN -3
-#define coyote_time 100
+#define coyote_time 10
+#define scroll_border 60
+#define death_border 122
+
+uint8_t playerInv = 0;
+uint8_t playerInvCtr = 0;
 
 // Analog input variables
-#define AMP_MIN 0x200 // 220 
-#define AMP_MAX 0x320  //300
-int analogIn = 0;
+#define AMP_MIN 0x220 // 220 
+#define AMP_MAX 0x300  //300
+int analogIn = 0x288;
 
 // timer variables
 int timerCycles;
@@ -63,7 +71,7 @@ void player_input() {
     if (pressedBtn){
         //BTN1
         if(pressedBtn & 1){
-            playerMoveUp();
+            //playerMoveUp();
         }
         // BTN2
         if(pressedBtn & 2){
@@ -78,7 +86,6 @@ void player_input() {
             playerMoveRight();
         }
     }
-    analogIn = 0;
     analogIn = sample_analog();
 
     if (analogIn < AMP_MIN || analogIn > AMP_MAX) {
@@ -86,7 +93,6 @@ void player_input() {
             playerUpVelocity++;
             inputcycles = 0;
         }    
-        
     }
     else {
         if ((inputcycles > coyote_time) & (playerUpVelocity > playerUpVelocity_MIN)) {
@@ -98,14 +104,24 @@ void player_input() {
     // Make it so that the maximum speed is 1 pixel per frame (slowest is 1 per 5 frames)
     if (playerUpVelocity > 0) {
         if (velocityBuffer >= (playerUpVelocity_MAX - playerUpVelocity)) {
-            currentY--;
-            velocityBuffer = 0;
+            if (currentY < scroll_border) {
+                generate_walls();
+            }
+            else {
+                currentY--;
+                velocityBuffer = 0;
+            }
         }
     }
     else {
         if (velocityBuffer >= (playerUpVelocity - playerUpVelocity_MIN)) {
-            currentY++;
-            velocityBuffer = 0;
+            if (currentY > death_border) {
+                player_out_of_bounds();
+            }
+            else {
+                currentY++;
+                velocityBuffer = 0;
+            }
         }
     }
     velocityBuffer++;
@@ -115,6 +131,16 @@ void entity_update() {
     /* spawn and update position of existing entities, 
         smart allocation, eg only can have 10 at a time
         (two arrays one with x values and one with y value)*/
+    return;
+}
+
+/* deduct life and return to start position */
+void player_out_of_bounds() {
+    playerLives--;
+    playerInv = 1;
+    playerInvCtr = 50;
+    currentX = playerSpawn_X;
+    currentY = playerSpawn_Y;
     return;
 }
 

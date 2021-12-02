@@ -25,13 +25,21 @@ extern uint8_t state;
 
 //Gameplay
 extern uint8_t currentY;
-extern uint8_t currentX;;
+extern uint8_t currentX;
+extern uint8_t playerInv;
+extern uint8_t playerInvCtr;
+extern uint8_t playerLives;
 
 void playerMovement(void);
 void playerMoveUp(void);
 void playerMoveDown(void);
 void playerMoveLeft(void);
 void playerMoveRight(void);
+
+void player_out_of_bounds(void);
+
+//Walls
+void generate_walls(void);
 
 //Game-Sprites
 void draw_balloon3(int x, int y);

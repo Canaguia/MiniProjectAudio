@@ -13,6 +13,7 @@
 #error "Timer period overflow."
 #endif
 
+
 int wall_left[128];
 int wall_right[128];
 int cycle = 0;
@@ -151,7 +152,7 @@ void draw_player() {
 
 void gameRunning(void) {
     // pause logic
-    if (getsw() & 1) {
+    if (SW1_SWITCHED) {
         state = 3;
     }
     draw_walls();
@@ -165,12 +166,16 @@ void gameRunning(void) {
 
     display_update();
 
+    if(playerLives == 0){
+        state = 5;
+    }
+
     return;
 }
 
 void gamePaused(void) {
 
-    if (!(getsw() & 1)) {
+    if (!(SW1_SWITCHED)) {
         state = 2;
     }
 
@@ -202,16 +207,16 @@ void gameStart(void) {
 
     gameStartCycle++;
 
-    draw_string(9, 10, "AIR");
-    draw_string(9, 20, "BAL");
-    draw_string(5, 30, "LOON");
-    draw_string(5, 116, "BTN1");
+    draw_string(0, 10, "AIR", 1);
+    draw_string(0, 20, "BAL", 1);
+    draw_string(0, 30, "LOON", 1);
+    draw_string(0, 116, "BTN1", 1);
 
     draw_play(12, 100);
 
     display_update();
 
-    if ((getbtns() & 1)) {
+    if ((BTN1_PRESSED)) {
         if (tutorialHasBeenShown == 0) {
             state = 4;
             tutorialHasBeenShown = 1;
@@ -220,15 +225,15 @@ void gameStart(void) {
             state = 2;
         }
     }
-    if (getsw() & 8) {
+    if (SW1_SWITCHED) {
         state = 6;
     }
     return;
 }
 
 void gameTutorial(void) {
-    draw_string(4, 10, "TUTO");
-    draw_string(4, 20, "RIAL");
+    draw_string(0, 10, "TUTO", 1);
+    draw_string(0, 20, "RIAL", 1);
 
     display_update();
 
@@ -240,55 +245,57 @@ void gameTutorial(void) {
 }
 
 void gameOver(void) {
-    draw_string(4, 10, "GAME");
-    draw_string(4, 20, "OVER");
-    draw_string(8, 40, "SCR");
+    draw_string(0, 10, "GAME", 1);
+    draw_string(0, 20, "OVER", 1);
+    draw_string(0, 40, "SCR", 1);
 
 
     if (score / 10 == 0) {
-        draw_string(14, 50, itoaconv(score));
+        draw_string(0, 50, itoaconv(score), 1);
     }
     else if (score / 100 == 0) {
-        draw_string(11, 50, itoaconv(score));
+        draw_string(0, 50, itoaconv(score), 1);
     }
     else if (score / 1000 == 0) {
-        draw_string(8, 50, itoaconv(score));
+        draw_string(0, 50, itoaconv(score), 1);
     }
     else {
-        draw_string(5, 50, itoaconv(score));
+        draw_string(0, 50, itoaconv(score), 1);
     }
     draw_play(12, 100);
-    draw_string(5, 116, "BTN1");
+    draw_string(0, 116, "BTN1", 1);
 
-    if (getbtns() & 1) {
+    if (BTN1_PRESSED) {
         state = 2;
         gameRunningCycle = 0;
     }
 
-    if (getsw() & 8) {
+    if (SW4_SWITCHED) {
         state = 6;
+    } else {
+        state = 5;
     }
     display_update();
 }
 
 void highScores(void) {
-    draw_string(5, 0, "TOP5");
+    draw_string(0, 0, "TOP5", 1);
     // Draw horizontal line under title 
     int i;
     for (i = 0; i < 31; i++) {
         draw_pixel(i, 10, 0);
     }
 
-    draw_string(8, 12, "ASS");
-    draw_string(10, 20, itoaconv(999));
-    draw_string(8, 32, "SNA");
-    draw_string(10, 40, itoaconv(528));
-    draw_string(8, 52, "FLP");
-    draw_string(10, 60, itoaconv(527));
-    draw_string(8, 72, "LOL");
-    draw_string(10, 80, itoaconv(75));
-    draw_string(8, 92, "AAA");
-    draw_string(10, 100, itoaconv(11));
+    draw_string(0, 12, "ASS", 0);
+    draw_string(0, 20, itoaconv(999), 1);
+    draw_string(0, 32, "SNA", 1);
+    draw_string(0, 40, itoaconv(528), 1);
+    draw_string(0, 52, "FLP", 1);
+    draw_string(0, 60, itoaconv(527), 1);
+    draw_string(0, 72, "LOL", 1);
+    draw_string(0, 80, itoaconv(75), 1);
+    draw_string(0, 92, "AAA", 1);
+    draw_string(0, 100, itoaconv(11), 1);
 
     display_update();
 }

@@ -16,10 +16,21 @@ uint8_t spi_send_recv(uint8_t data);
 uint8_t canvas[512];
 void draw_pixel(int x, int y, int colPix);
 void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t *data);
-void draw_string(uint8_t x, uint8_t y, char *str);
+void draw_string(uint8_t x, uint8_t y, char *str, char centered);
 void draw_int(uint8_t x, uint8_t y, int num);
 void display_canvas(void);
 void clear_canvas(void);
+
+// DEFINE BUTTONS AND SWITCHES
+#define BTN1_PRESSED (getbtns() & 1)
+#define BTN2_PRESSED (getbtns() & 2)
+#define BTN3_PRESSED (getbtns() & 4)
+#define BTN4_PRESSED (getbtns() & 8)
+
+#define SW1_SWITCHED (getsw() & 1)
+#define SW2_SWITCHED (getsw() & 2)
+#define SW3_SWITCHED (getsw() & 4)
+#define SW4_SWITCHED (getsw() & 8)
 
 extern uint8_t state;
 

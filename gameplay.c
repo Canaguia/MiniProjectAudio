@@ -7,6 +7,7 @@
 
 uint8_t currentY = 61;
 uint8_t currentX = 15;
+int currentScore = 0;
 
 int inputcycles;
 int playerUpVelocity = 0;
@@ -68,9 +69,9 @@ void player_input() {
             playerMoveUp();
         }
         // BTN2
-        if(pressedBtn & 2){
-            playerMoveDown();
-        }
+        // if(pressedBtn & 2){
+        //     playerMoveDown();
+        // }
         // BTN3
         if(pressedBtn & 4){
             playerMoveLeft();

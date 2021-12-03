@@ -70,6 +70,12 @@ int main(void) {
 			gameRunning();
 		} else if (state == 3){
 			gamePaused();
+		} else if (state == 4){
+			gameTutorial();
+		} else if (state == 5){
+			gameOver();
+		} else if (state == 6){
+			highScores();
 		}
 	}
 	return 0;

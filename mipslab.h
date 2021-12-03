@@ -16,7 +16,8 @@ uint8_t spi_send_recv(uint8_t data);
 uint8_t canvas[512];
 void draw_pixel(int x, int y, int colPix);
 void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t *data);
-void draw_string(uint8_t x, uint8_t y, char *str);
+void draw_letter(uint8_t x, uint8_t y, uint8_t data, uint8_t letterColIndex);
+void draw_string(uint8_t x, uint8_t y, char *str, char centered);
 void draw_int(uint8_t x, uint8_t y, int num);
 void display_canvas(void);
 void clear_canvas(void);
@@ -25,7 +26,9 @@ extern uint8_t state;
 
 //Gameplay
 extern uint8_t currentY;
-extern uint8_t currentX;;
+extern uint8_t currentX;
+extern int currentScore;
+extern int tutorialHasBeenShown;
 
 void playerMovement(void);
 void playerMoveUp(void);

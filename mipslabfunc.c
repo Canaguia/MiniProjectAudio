@@ -133,30 +133,6 @@ void display_image(int x, const uint8_t *data) {
 	}
 }
 
-// void display_update(void) {
-// 	int i, j, k;
-// 	int c;
-// 	for(i = 0; i < 4; i++) {
-// 		DISPLAY_CHANGE_TO_COMMAND_MODE;
-// 		spi_send_recv(0x22);
-// 		spi_send_recv(i);
-		
-// 		spi_send_recv(0x0);
-// 		spi_send_recv(0x10);
-		
-// 		DISPLAY_CHANGE_TO_DATA_MODE;
-		
-// 		for(j = 0; j < 16; j++) {
-// 			c = textbuffer[i][j];
-// 			if(c & 0x80)
-// 				continue;
-			
-// 			for(k = 0; k < 8; k++)
-// 				spi_send_recv(font[c*8 + k]);
-// 		}
-// 	}
-// }
-
 void display_update(void){
 	int i;
 	for(i = 0; i < CANVAS_ARRAY_SIZE; i++){
@@ -191,36 +167,35 @@ void draw_pixel(int x, int y, int colPix) {
 	// HANDLE COLLISIONS WITH colPix
 }
 
-void draw_string(uint8_t x, uint8_t y, char *str) {
+void draw_string(uint8_t x, uint8_t y, char* str) {
+
 	const char* i;
-	int j;
-	int k = x;
 	for (i = str; *i!='\0'; i++) {
 		char c = *i;
 		/* Dont draw outside the screen */
-		if(x > 32) {
-			continue;
-		}
-		/* Space character */
-		if(c == 32) {
-			y += 4;
-			continue;
-		}
-		/* Display every hex value of a char */
-		for (j = 0; j<5; j++) {
-			/* Capital letters */
+
+		// if(c == 32) {
+		// 	x += 4;
+		// 	continue;
+		// }
+
+		int j;
+		for(j = 0; j < 5; j++){
+			uint8_t data;
 			if(c >= 65 && c <= 90) {
-				canvas[j*128 + k + y] |= charArray[(c - 65)*5 + j];
-			/* Normal letters */
-			} else if(c >= 97 && c <= 122) {
-				canvas[j*128 + k + y] |= charArray[(c - 65 - 32)*5 + j];
-			/* Digits and colon */
-		    } else if(c >= 48 && c <= 58) {
-				canvas[j*128 + k + y] |= charArray[(c - 48 + 26)*5 + j];
+				data = charArray[(c - 65)*5 + j];
+			} else if(c >= 48 && c <= 58){
+				data = charArray[(c - 48 + 26)*5 + j];
+			}
+			int k;
+			for(k = 0; k < 8; k++){
+				if(data & 0x01){
+					draw_pixel(x + j, y + k, 0);
+				}
+				data = data >> 1;
 			}
 		}
-		/* Next letter and add space. */
-		y += 7;
+		x += 7;
 	}
 }
 

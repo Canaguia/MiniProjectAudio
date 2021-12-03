@@ -20,6 +20,13 @@ int cycle = 0;
 int playerHeight = 0;
 int playerFlashDur = 0;
 
+int tutorialHasBeenShown = 0;
+
+int gameStartCycle = 0;
+int gameRunningCycle = 0;
+int animCycle;
+int score;
+
 /* Interrupt Service Routine */
 void user_isr(void) {
     return;
@@ -175,40 +182,117 @@ void gamePaused(void) {
 
 void gameStart(void) {
 
-    if ((cycle / 100) % 4 == 0) {
+    animCycle = gameStartCycle / 100;
+
+    if ((animCycle) % 4 == 0) {
         draw_balloon3(15, 61);
     }
-    if ((cycle / 100) % 4 == 1) {
+    if ((animCycle) % 4 == 1) {
         draw_balloon2(15, 61);
     }
-    if ((cycle / 100) % 4 == 2) {
+    if ((animCycle) % 4 == 2) {
         draw_balloon1(15, 61);
     }
-    if ((cycle / 100) % 4 == 3) {
+    if ((animCycle) % 4 == 3) {
         draw_balloon0(14, 60);
     }
-    if (cycle >= 400) {
-        cycle = 0;
+    if (animCycle >= 4) {
+        animCycle = 0;
     }
-    cycle++;
-    playerInv = 0;
 
-    populate_walls();
+    gameStartCycle++;
 
-    draw_string(10, 20, "SINA");
+    draw_string(9, 10, "AIR");
+    draw_string(9, 20, "BAL");
+    draw_string(5, 30, "LOON");
+    draw_string(5, 116, "BTN1");
 
     draw_play(12, 100);
 
     display_update();
 
-    quicksleep(1000);
-
     if ((getbtns() & 1)) {
+        if (tutorialHasBeenShown == 0) {
+            state = 4;
+            tutorialHasBeenShown = 1;
+        }
+        else {
+            state = 2;
+        }
+    }
+    if (getsw() & 8) {
+        state = 6;
+    }
+    return;
+}
+
+void gameTutorial(void) {
+    draw_string(4, 10, "TUTO");
+    draw_string(4, 20, "RIAL");
+
+    display_update();
+
+    if ((getbtns() & 8)) {
         state = 2;
     }
 
     return;
 }
+
+void gameOver(void) {
+    draw_string(4, 10, "GAME");
+    draw_string(4, 20, "OVER");
+    draw_string(8, 40, "SCR");
+
+
+    if (score / 10 == 0) {
+        draw_string(14, 50, itoaconv(score));
+    }
+    else if (score / 100 == 0) {
+        draw_string(11, 50, itoaconv(score));
+    }
+    else if (score / 1000 == 0) {
+        draw_string(8, 50, itoaconv(score));
+    }
+    else {
+        draw_string(5, 50, itoaconv(score));
+    }
+    draw_play(12, 100);
+    draw_string(5, 116, "BTN1");
+
+    if (getbtns() & 1) {
+        state = 2;
+        gameRunningCycle = 0;
+    }
+
+    if (getsw() & 8) {
+        state = 6;
+    }
+    display_update();
+}
+
+void highScores(void) {
+    draw_string(5, 0, "TOP5");
+    // Draw horizontal line under title 
+    int i;
+    for (i = 0; i < 31; i++) {
+        draw_pixel(i, 10, 0);
+    }
+
+    draw_string(8, 12, "ASS");
+    draw_string(10, 20, itoaconv(999));
+    draw_string(8, 32, "SNA");
+    draw_string(10, 40, itoaconv(528));
+    draw_string(8, 52, "FLP");
+    draw_string(10, 60, itoaconv(527));
+    draw_string(8, 72, "LOL");
+    draw_string(10, 80, itoaconv(75));
+    draw_string(8, 92, "AAA");
+    draw_string(10, 100, itoaconv(11));
+
+    display_update();
+}
+
 
 void masterGameLoop() {
     if (TMR2 == 0) {
@@ -221,6 +305,15 @@ void masterGameLoop() {
         }
         else if (state == 3) {
             gamePaused();
+        }
+        else if (state == 4) {
+            gameTutorial();
+        }
+        else if (state == 5) {
+            gameOver();
+        }
+        else if (state == 6) {
+            highScores();
         }
     }
 }

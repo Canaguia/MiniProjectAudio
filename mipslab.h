@@ -57,6 +57,9 @@ char * itoaconv( int num );
 void gameRunning(void);
 void quicksleep(int cyc);
 
+// Highscore
+void display_highscores(char playerName[], int playerHighscore);
+
 /* Declare display_debug - a function to help debugging.
 
    After calling display_debug,

@@ -25,7 +25,7 @@ int tutorialHasBeenShown = 0;
 int gameStartCycle = 0;
 int gameRunningCycle = 0;
 int animCycle;
-int score;
+int score = 0;
 
 /* Interrupt Service Routine */
 void user_isr(void) {
@@ -35,9 +35,9 @@ void user_isr(void) {
 /* Returns a pseudorandom int based on the timer value and a given 0-max range (not included)*/
 int pseudo_random(int max) {
     int n, k, x;
-    n = (TMR2 >> 2);
-    k = ADC1BUF0 > 3;
-    x = (n * k + 35) % max;
+    n = (TMR2 > 1);
+    k = TMR2;
+    x = (n * k) % max;
     return x;
 }
 
@@ -161,6 +161,7 @@ void draw_player() {
 }
 
 void gameRunning(void) {
+    draw_string(1, 1, itoaconv(score));
     // pause logic
     if (getsw() & 1) {
         state = 3;
@@ -174,7 +175,7 @@ void gameRunning(void) {
     draw_bird(1, 80);
     draw_bird(22, 30);
 
-    display_update();
+    
 
     if (playerLives == 0) {
         state = 5;
@@ -189,8 +190,6 @@ void gamePaused(void) {
     }
 
     draw_pause(12, 57);
-    display_update();
-
     return;
 }
 
@@ -223,8 +222,6 @@ void gameStart(void) {
 
     draw_play(12, 100);
 
-    display_update();
-
     if ((getbtns() & 1)) {
         if (tutorialHasBeenShown == 0) {
             state = 4;
@@ -243,8 +240,6 @@ void gameStart(void) {
 void gameTutorial(void) {
     draw_string(4, 10, "TUTO");
     draw_string(4, 20, "RIAL");
-
-    display_update();
 
     if ((getbtns() & 8)) {
         state = 2;
@@ -276,12 +271,14 @@ void gameOver(void) {
     if (getbtns() & 1) {
         state = 2;
         gameRunningCycle = 0;
+        playerLives = 3;
     }
 
     if (getsw() & 8) {
         state = 6;
     }
-    display_update();
+
+    return;
 }
 
 void highScores(void) {
@@ -293,6 +290,9 @@ void highScores(void) {
     }
     display_highscores("NAN", 0x0755);
 
+    if (!(getsw() & 8)) {
+        state = 5;
+    }
     return;
 }
 
@@ -318,6 +318,7 @@ void masterGameLoop() {
         else if (state == 6) {
             highScores();
         }
+        display_update();
     }
 }
 

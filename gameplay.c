@@ -14,9 +14,9 @@ uint8_t playerLives = 3;
 int inputcycles = 0;
 int playerUpVelocity = 0;
 int velocityBuffer = 0;
-#define playerUpVelocity_MAX 0
+#define playerUpVelocity_MAX 3
 #define playerUpVelocity_MIN -3
-#define coyote_time 10
+#define coyote_time 30
 #define scroll_border 60
 #define death_border 122
 
@@ -24,8 +24,8 @@ uint8_t playerInv = 0;
 uint8_t playerInvCtr = 0;
 
 // Analog input variables
-#define AMP_MIN 0x220 // 220 
-#define AMP_MAX 0x300  //300
+#define AMP_MIN 300 // 220 
+#define AMP_MAX 600  //300
 int analogIn = 0x288;
 
 // timer variables
@@ -87,6 +87,7 @@ void player_input() {
         }
     }
     analogIn = sample_analog();
+    draw_string(5, 10, itoaconv(analogIn));
 
     if (analogIn < AMP_MIN || analogIn > AMP_MAX) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
@@ -106,6 +107,7 @@ void player_input() {
         if (velocityBuffer >= (playerUpVelocity_MAX - playerUpVelocity)) {
             if (currentY < scroll_border) {
                 generate_walls();
+                score++;
             }
             else {
                 currentY--;

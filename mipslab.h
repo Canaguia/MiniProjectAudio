@@ -22,6 +22,7 @@ void display_canvas(void);
 void clear_canvas(void);
 
 extern uint8_t state;
+extern int score;
 
 //Gameplay
 extern uint8_t currentY;

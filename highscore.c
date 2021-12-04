@@ -5,6 +5,8 @@
 #define EEPROM_ADDR 0x50
 #define totalHighscores 25
 
+uint16_t memAddress = 0x1200;
+
 
 /* Wait for I2C bus to become idle */
 void i2c_idle() {
@@ -124,12 +126,18 @@ void write_highscore(uint16_t address, uint8_t bytes, uint8_t data[]) {
 	return;
 }
 
+/* Clears all saved highscores at memAddress*/
+void clear_highscore_data() {
+	uint8_t temp[25] = { 0 }; // clears entire page on write of more than 1-byte (64-bytes)
+	write_highscore(memAddress, 25, temp);
+	return;
+}
+
 /* load, compare and display all highscores (top 5) */
 void display_highscores(char playerName[], int playerHighscore) {
 	int i;
 	char textstring[3];
 	int highscore = 0;
-	uint16_t memAddress = 0x1200;
 	uint8_t t;
 
 	// read highscores from EEPROM storage and put them into 2D-array
@@ -182,13 +190,13 @@ void display_highscores(char playerName[], int playerHighscore) {
 	write_highscore(memAddress, totalHighscores, tempArr);
 
 	// use itoa to convert top 5 to decimal string && print
-	char name[] = "---";
+	char name[] = "   ";
 	for (i = 0; i <= 5; i++) {
 		name[0] = charArr[i * 3];
 		name[1] = charArr[i * 3 + 1];
 		name[2] = charArr[i * 3 + 2];
-		draw_string(8, 12 + 20*i, name);
-		draw_string(10, 20 + 20*i, itoaconv(scoreArr[i]));
+		draw_string(8, 12 + 20*i, name,1);
+		draw_string(10, 20 + 20*i, itoaconv(scoreArr[i]),1);
 	}
 	display_update();
 }

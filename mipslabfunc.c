@@ -161,35 +161,56 @@ void draw_pixel(int x, int y, int colPix) {
 		int xOffset = x % 8;
 		int page = (x + 8) / 8;
 		int arrayPos = page * 128 - y;
+		
+		// HANDLE COLLISIONS WITH colPix
+		if (colPix & (canvas[arrayPos] & (1 << xOffset))) {
+			if (!playerInv) {
+				player_out_of_bounds();
+			}
+			return;
+		}
 		canvas[arrayPos] |= 1 << xOffset;
 	}
-
-	// HANDLE COLLISIONS WITH colPix
+	return;
 }
 
-void draw_string(uint8_t x, uint8_t y, char* str) {
+void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
 
 	const char* i;
-	for (i = str; *i!='\0'; i++) {
+	uint8_t strLength = 0;
+	if (centered == 1) {
+		const char* a;
+		for (a = str; *a != '\0'; a++) {
+			strLength++;
+		}
+		if (strLength == 1) x = 14;
+		else if (strLength == 2) x = 11;
+		else if (strLength == 3) x = 8;
+		else if (strLength == 4) x = 5;
+		else x = 0;
+	}
+
+	for (i = str; *i != '\0'; i++) {
 		char c = *i;
 		/* Dont draw outside the screen */
 
 		// if(c == 32) {
-		// 	x += 4;
-		// 	continue;
+		//  x += 4;
+		//  continue;
 		// }
 
 		int j;
-		for(j = 0; j < 5; j++){
+		for (j = 0; j < 5; j++) {
 			uint8_t data;
-			if(c >= 65 && c <= 90) {
-				data = charArray[(c - 65)*5 + j];
-			} else if(c >= 48 && c <= 58){
-				data = charArray[(c - 48 + 26)*5 + j];
+			if (c >= 65 && c <= 90) {
+				data = charArray[(c - 65) * 5 + j];
+			}
+			else if (c >= 48 && c <= 58) {
+				data = charArray[(c - 48 + 26) * 5 + j];
 			}
 			int k;
-			for(k = 0; k < 8; k++){
-				if(data & 0x01){
+			for (k = 0; k < 8; k++) {
+				if (data & 0x01) {
 					draw_pixel(x + j, y + k, 0);
 				}
 				data = data >> 1;

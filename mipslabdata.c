@@ -318,51 +318,52 @@ void draw_balloonD(int x, int y) {
 
 // Baloon POPPING 0HP!
 void draw_bird(int x, int y){
-	draw_pixel(x+3, y  , 1);
-	draw_pixel(x+4, y  , 1);
-	draw_pixel(x+5, y  , 1);
-	draw_pixel(x+6, y  , 1);
+	draw_pixel(x+3, y  , 0);
+	draw_pixel(x+4, y  , 0);
+	draw_pixel(x+5, y  , 0);
+	draw_pixel(x+6, y  , 0);
 
-	draw_pixel(x+2, y+1, 1);
-	draw_pixel(x+3, y+1, 1);
-	draw_pixel(x+5, y+1, 1);
+	draw_pixel(x+2, y+1, 0);
+	draw_pixel(x+3, y+1, 0);
+	draw_pixel(x+5, y+1, 0);
 
-	draw_pixel(x+3, y+2, 1);
-	draw_pixel(x+4, y+2, 1);
-	draw_pixel(x+5, y+2, 1);
+	draw_pixel(x+3, y+2, 0);
+	draw_pixel(x+4, y+2, 0);
+	draw_pixel(x+5, y+2, 0);
 
-	draw_pixel(x+6, y+3, 1);
+	draw_pixel(x+6, y+3, 0);
 
-	draw_pixel(x+4, y+4, 1);
-	draw_pixel(x+5, y+4, 1);
-	draw_pixel(x+6, y+4, 1);
-	draw_pixel(x+7, y+4, 1);
+	draw_pixel(x+4, y+4, 0);
+	draw_pixel(x+5, y+4, 0);
+	draw_pixel(x+6, y+4, 0);
+	draw_pixel(x+7, y+4, 0);
 
-	draw_pixel(x  , y+5, 1);
-	draw_pixel(x+4, y+5, 1);
-	draw_pixel(x+5, y+5, 1);
-	draw_pixel(x+6, y+5, 1);
-	draw_pixel(x+7, y+5, 1);
+	draw_pixel(x  , y+5, 0);
+	draw_pixel(x+4, y+5, 0);
+	draw_pixel(x+5, y+5, 0);
+	draw_pixel(x+6, y+5, 0);
+	draw_pixel(x+7, y+5, 0);
 
-	draw_pixel(x  , y+6, 1);
-	draw_pixel(x+1, y+6, 1);
-	draw_pixel(x+4, y+6, 1);
-	draw_pixel(x+5, y+6, 1);
-	draw_pixel(x+6, y+6, 1);
+	draw_pixel(x  , y+6, 0);
+	draw_pixel(x+1, y+6, 0);
+	draw_pixel(x+4, y+6, 0);
+	draw_pixel(x+5, y+6, 0);
+	draw_pixel(x+6, y+6, 0);
 
-	draw_pixel(x  , y+7, 1);
-	draw_pixel(x+1, y+7, 1);
-	draw_pixel(x+5, y+7, 1);
+	draw_pixel(x  , y+7, 0);
+	draw_pixel(x+1, y+7, 0);
+	draw_pixel(x+5, y+7, 0);
 
-	draw_pixel(x+1, y+8, 1);
-	draw_pixel(x+2, y+8, 1);
-	draw_pixel(x+4, y+8, 1);
-	draw_pixel(x+6, y+8, 1);
-	draw_pixel(x+8, y+8, 1);
-	draw_pixel(x+9, y+8, 1);
+	draw_pixel(x+1, y+8, 0);
+	draw_pixel(x+2, y+8, 0);
+	draw_pixel(x+4, y+8, 0);
+	draw_pixel(x+6, y+8, 0);
+	draw_pixel(x+8, y+8, 0);
+	draw_pixel(x+9, y+8, 0);
 	
-	draw_pixel(x+7, y+9, 1);
+	draw_pixel(x+7, y+9, 0);
 }
+
 
 void draw_pause(int x, int y){
 	draw_pixel(x   , y  , 0);

@@ -87,7 +87,7 @@ void player_input() {
         }
     }
     analogIn = sample_analog();
-    draw_string(5, 10, itoaconv(analogIn));
+    draw_string(5, 10, itoaconv(analogIn),1);
 
     if (analogIn < AMP_MIN || analogIn > AMP_MAX) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
@@ -135,6 +135,7 @@ void player_out_of_bounds() {
     playerLives--;
     playerInv = 1;
     playerInvCtr = 50;
+    playerUpVelocity = 0;
     currentX = playerSpawn_X;
     currentY = playerSpawn_Y;
     return;

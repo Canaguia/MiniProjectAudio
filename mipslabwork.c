@@ -26,6 +26,7 @@ int gameStartCycle = 0;
 int gameRunningCycle = 0;
 int animCycle;
 int score = 0;
+volatile int randomSpice = 439123;
 
 /* Interrupt Service Routine */
 void user_isr(void) {
@@ -33,11 +34,13 @@ void user_isr(void) {
 }
 
 /* Returns a pseudorandom int based on the timer value and a given 0-max range (not included)*/
-int pseudo_random(int max) {
-    int n, k, x;
-    n = (TMR2 >> 1);
-    k = TMR2 >> 3;
-    x = (n * k) % max;
+uint8_t pseudo_random(int max) {
+    volatile uint8_t x;
+    //n = (TMR2 >> 1);
+    //k = TMR2 >> 3;
+    x = (15032 * randomSpice + 12139) % 929345;
+    randomSpice = x;
+    x = x % max;
     return x;
 }
 
@@ -66,7 +69,7 @@ void generate_walls() {
     int i, t;
     // scroll existing walls by 1 pixel
     for (i = 0; i < 127; i++) {
-        wall_left[127-i] = wall_left[126-i];
+        wall_left[127-i] = wall_left[126 - i];
         wall_right[127 - i] = wall_right[126 - i];
     }
     // generate and insert new wall pattern
@@ -119,6 +122,11 @@ void labinit(void)
     I2C1CONSET = 1 << 15; // ON = 1 (turn on)
     temp = I2C1RCV; //Clear receive buffer
 
+
+    // game init
+    populate_walls();
+    clear_highscore_data();
+
     return;
 }
 
@@ -161,18 +169,18 @@ void draw_player() {
 }
 
 void gameRunning(void) {
-    draw_string(1, 1, itoaconv(score));
+    draw_string(1, 1, itoaconv(score),1);
     // pause logic
     if (getsw() & 1) {
         state = 3;
     }
-    draw_walls();
-
+    
     player_input();
 
+    draw_walls();
     render_entity();
 
-    draw_player();
+    draw_player(); // important that player is drawn last
 
     if (playerLives == 0) {
         state = 5;
@@ -212,10 +220,10 @@ void gameStart(void) {
 
     gameStartCycle++;
 
-    draw_string(9, 10, "AIR");
-    draw_string(9, 20, "BAL");
-    draw_string(5, 30, "LOON");
-    draw_string(5, 116, "BTN1");
+    draw_string(9, 10, "AIR",1);
+    draw_string(9, 20, "BAL",1);
+    draw_string(5, 30, "LOON",1);
+    draw_string(5, 116, "BTN1",1);
 
     draw_play(12, 100);
 
@@ -235,8 +243,8 @@ void gameStart(void) {
 }
 
 void gameTutorial(void) {
-    draw_string(4, 10, "TUTO");
-    draw_string(4, 20, "RIAL");
+    draw_string(4, 10, "TUTO",1);
+    draw_string(4, 20, "RIAL",1);
 
     if ((getbtns() & 8)) {
         state = 2;
@@ -246,24 +254,14 @@ void gameTutorial(void) {
 }
 
 void gameOver(void) {
-    draw_string(4, 10, "GAME");
-    draw_string(4, 20, "OVER");
-    draw_string(8, 40, "SCR");
+    draw_string(4, 10, "GAME",1);
+    draw_string(4, 20, "OVER",1);
+    draw_string(8, 40, "SCR",1);
 
-    if (score / 10 == 0) {
-        draw_string(14, 50, itoaconv(score));
-    }
-    else if (score / 100 == 0) {
-        draw_string(11, 50, itoaconv(score));
-    }
-    else if (score / 1000 == 0) {
-        draw_string(8, 50, itoaconv(score));
-    }
-    else {
-        draw_string(5, 50, itoaconv(score));
-    }
+    draw_string(5, 50, itoaconv(score), 1);
+
     draw_play(12, 100);
-    draw_string(5, 116, "BTN1");
+    draw_string(5, 116, "BTN1",1);
 
     if (getbtns() & 1) {
         state = 2;
@@ -279,13 +277,13 @@ void gameOver(void) {
 }
 
 void highScores(void) {
-    draw_string(5, 0, "TOP5");
+    draw_string(5, 0, "TOP5",1);
     // Draw horizontal line under title 
     int i;
     for (i = 0; i < 31; i++) {
         draw_pixel(i, 10, 0);
     }
-    display_highscores("NAN", 0x0755);
+    display_highscores("NUL", 0);
 
     if (!(getsw() & 8)) {
         state = 5;

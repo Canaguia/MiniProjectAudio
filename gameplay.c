@@ -107,6 +107,7 @@ void player_input() {
         if (velocityBuffer >= (playerUpVelocity_MAX - playerUpVelocity)) {
             if (currentY < scroll_border) {
                 generate_walls();
+                entity_scroll();
                 score++;
             }
             else {
@@ -127,13 +128,6 @@ void player_input() {
         }
     }
     velocityBuffer++;
-}
-
-void entity_update() {
-    /* spawn and update position of existing entities, 
-        smart allocation, eg only can have 10 at a time
-        (two arrays one with x values and one with y value)*/
-    return;
 }
 
 /* deduct life and return to start position */

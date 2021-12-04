@@ -35,8 +35,8 @@ void user_isr(void) {
 /* Returns a pseudorandom int based on the timer value and a given 0-max range (not included)*/
 int pseudo_random(int max) {
     int n, k, x;
-    n = (TMR2 > 1);
-    k = TMR2;
+    n = (TMR2 >> 1);
+    k = TMR2 >> 3;
     x = (n * k) % max;
     return x;
 }
@@ -170,12 +170,9 @@ void gameRunning(void) {
 
     player_input();
 
+    render_entity();
+
     draw_player();
-
-    draw_bird(1, 80);
-    draw_bird(22, 30);
-
-    
 
     if (playerLives == 0) {
         state = 5;
@@ -295,7 +292,6 @@ void highScores(void) {
     }
     return;
 }
-
 
 void masterGameLoop() {
     if (TMR2 == 0) {

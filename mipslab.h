@@ -12,7 +12,7 @@ void display_update(void);
 
 uint8_t spi_send_recv(uint8_t data);
 
-// NEW
+// Canvas
 uint8_t canvas[512];
 void draw_pixel(int x, int y, int colPix);
 void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t *data);
@@ -42,6 +42,10 @@ void player_out_of_bounds(void);
 //Walls
 void generate_walls(void);
 
+//Entities
+void entity_scroll(void);
+void render_entity(void);
+
 //Game-Sprites
 void draw_balloon3(int x, int y);
 void draw_balloon2(int x, int y);
@@ -57,6 +61,7 @@ void draw_play(int x, int y);
 char * itoaconv( int num );
 void gameRunning(void);
 void quicksleep(int cyc);
+int pseudo_random(int max);
 
 // Highscore
 void display_highscores(char playerName[], int playerHighscore);

@@ -13,6 +13,7 @@
 #error "Timer period overflow."
 #endif
 
+
 int wall_left[128];
 int wall_right[128];
 int cycle = 0;
@@ -27,6 +28,15 @@ int gameRunningCycle = 0;
 int animCycle;
 int score = 0;
 volatile int randomSpice = 439123;
+
+int btnCounter = 2;
+uint8_t nameSlotIndex = 0;
+uint8_t stateBefore = 2;
+
+char playerName[] = "AAA";
+char letter0[1] = "A";
+char letter1[1] = "A";
+char letter2[1] = "A";
 
 /* Interrupt Service Routine */
 void user_isr(void) {
@@ -125,7 +135,7 @@ void labinit(void)
 
     // game init
     populate_walls();
-    clear_highscore_data();
+    //clear_highscore_data();
 
     return;
 }
@@ -254,25 +264,83 @@ void gameTutorial(void) {
 }
 
 void gameOver(void) {
-    draw_string(4, 10, "GAME",1);
-    draw_string(4, 20, "OVER",1);
-    draw_string(8, 40, "SCR",1);
+    draw_string(0, 10, "GAME", 1);
+    draw_string(0, 20, "OVER", 1);
 
-    draw_string(5, 50, itoaconv(score), 1);
+    draw_string(0, 40, "SCR", 1);
+    draw_string(0, 50, itoaconv(score), 1);
 
-    draw_play(12, 100);
-    draw_string(5, 116, "BTN1",1);
+    draw_string(0, 90, "NAME", 1);
 
-    if (getbtns() & 1) {
+    int i;
+    for (i = 0; i < 7; i++) {
+        draw_pixel(i + 4, 120, 0);
+        draw_pixel(i + 14, 120, 0);
+        draw_pixel(i + 24, 120, 0);
+    }
+
+    if (btnCounter < 0) {
+        if (BTN1_PRESSED) {
+            switch (nameSlotIndex) {
+            case 0:
+                letter0[0]++;
+                if (letter0[0] > 65 + 25) {
+                    letter0[0] = 65;
+                }
+                break;
+            case 1:
+                letter1[0]++;
+                if (letter1[0] > 65 + 25) {
+                    letter1[0] = 65;
+                }
+                break;
+            case 2:
+                letter2[0]++;
+                if (letter2[0] > 65 + 25) {
+                    letter2[0] = 65;
+                }
+                break;
+            default:
+                break;
+            }
+            btnCounter = 2;
+        }
+        else if (BTN2_PRESSED) {
+            nameSlotIndex++;
+            if (nameSlotIndex > 2) {
+                nameSlotIndex = 0;
+            }
+            btnCounter = 2;
+        }
+        else if (BTN3_PRESSED) {
+            playerName[0] = letter0[0];
+            playerName[1] = letter1[0];
+            playerName[2] = letter2[0];
+
+            display_highscores(playerName, score);
+        }
+        
+    }
+    btnCounter--;
+
+    if (SW4_SWITCHED) {
+        state = 6;
+        stateBefore = 5;
+    }
+
+    
+    if (BTN4_PRESSED) {
         state = 2;
         gameRunningCycle = 0;
+        score = 0;
         playerLives = 3;
     }
 
-    if (getsw() & 8) {
-        state = 6;
-    }
+    draw_string(5, 110, letter0, 0);
+    draw_string(15, 110, letter1, 0);
+    draw_string(25, 110, letter2, 0);
 
+    
     return;
 }
 

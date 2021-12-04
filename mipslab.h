@@ -24,6 +24,18 @@ void clear_canvas(void);
 extern uint8_t state;
 extern int score;
 
+// buttons
+#define BTN1_PRESSED (getbtns() & 1)
+#define BTN2_PRESSED (getbtns() & 2)
+#define BTN3_PRESSED (getbtns() & 4)
+#define BTN4_PRESSED (getbtns() & 8)
+
+#define SW1_SWITCHED (getsw() & 1)
+#define SW2_SWITCHED (getsw() & 2)
+#define SW3_SWITCHED (getsw() & 4)
+#define SW4_SWITCHED (getsw() & 8)
+
+
 //Gameplay
 extern uint8_t currentY;
 extern uint8_t currentX;

@@ -21,6 +21,8 @@ void draw_int(uint8_t x, uint8_t y, int num);
 void display_canvas(void);
 void clear_canvas(void);
 
+char getNameSlotLetter(char* letter);
+
 // DEFINE BUTTONS AND SWITCHES
 #define BTN1_PRESSED (getbtns() & 1)
 #define BTN2_PRESSED (getbtns() & 2)
@@ -33,6 +35,7 @@ void clear_canvas(void);
 #define SW4_SWITCHED (getsw() & 8)
 
 extern uint8_t state;
+extern uint8_t stateBefore;
 
 //Gameplay
 extern uint8_t currentY;

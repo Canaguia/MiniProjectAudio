@@ -180,6 +180,7 @@ void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
         else if (strLength == 2) x = 11;
         else if (strLength == 3) x = 8;
         else if (strLength == 4) x = 5;
+		else x = 0;
     }
 
     for (i = str; *i!='\0'; i++) {
@@ -211,10 +212,6 @@ void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
     }
 }
 
-
-void draw_int(uint8_t x, uint8_t y, int num) {
-
-}
 
 /* display the current saved canvas where each bit represents a pixel on the screen */
 void display_canvas(void) {

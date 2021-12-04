@@ -13,6 +13,7 @@
 #error "Timer period overflow."
 #endif
 
+char const letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 int wall_left[128];
 int wall_right[128];
@@ -23,10 +24,21 @@ int playerFlashDur = 0;
 
 int tutorialHasBeenShown = 0;
 
-int gameStartCycle = 0;
-int gameRunningCycle = 0;
+int btnCounter = 2;
+int gameStartCycle;
+int game = 0;
 int animCycle;
 int score;
+
+char letter0[1] = "A";
+char letter1[1] = "A";
+char letter2[1] = "A";
+
+
+int nameSlotIndex = 0;
+
+uint8_t state = 1;
+uint8_t stateBefore = 1;
 
 /* Interrupt Service Routine */
 void user_isr(void) {
@@ -142,7 +154,7 @@ void draw_player() {
         draw_balloon1(currentX, currentY);
         break;
     case 0:
-        draw_balloon0(currentX,currentY);
+        draw_balloon0(currentX, currentY);
         break;
     default:
         break;
@@ -225,8 +237,13 @@ void gameStart(void) {
             state = 2;
         }
     }
+
+    if(BTN2_PRESSED){
+        state = 5;
+    }
     if (SW1_SWITCHED) {
         state = 6;
+        stateBefore = 1;
     }
     return;
 }
@@ -247,35 +264,64 @@ void gameTutorial(void) {
 void gameOver(void) {
     draw_string(0, 10, "GAME", 1);
     draw_string(0, 20, "OVER", 1);
+
     draw_string(0, 40, "SCR", 1);
+    draw_string(0, 50, itoaconv(score), 1); 
 
+    draw_string(0, 90, "NAME", 1);
 
-    if (score / 10 == 0) {
-        draw_string(0, 50, itoaconv(score), 1);
+    int i;
+    for(i = 0; i < 7; i++){
+        draw_pixel(i+4, 120, 0);
+        draw_pixel(i+14, 120, 0);
+        draw_pixel(i+24, 120, 0);
     }
-    else if (score / 100 == 0) {
-        draw_string(0, 50, itoaconv(score), 1);
-    }
-    else if (score / 1000 == 0) {
-        draw_string(0, 50, itoaconv(score), 1);
-    }
-    else {
-        draw_string(0, 50, itoaconv(score), 1);
-    }
-    draw_play(12, 100);
-    draw_string(0, 116, "BTN1", 1);
 
-    if (BTN1_PRESSED) {
-        state = 2;
-        gameRunningCycle = 0;
+    if(btnCounter < 0){
+        if (BTN1_PRESSED) {
+            switch (nameSlotIndex){
+                case 0:
+                    letter0[0]++;
+                    if(letter0[0] > 65 + 25){
+                        letter0[0] = 65;
+                    }
+                    break;
+                case 1:
+                    letter1[0]++;
+                    if(letter1[0] > 65 + 25){
+                        letter1[0] = 65;
+                    }
+                    break;
+                case 2:
+                    letter2[0]++;
+                    if(letter2[0] > 65 + 25){
+                        letter2[0] = 65;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (BTN2_PRESSED) {
+            nameSlotIndex++;
+            if(nameSlotIndex > 2){
+                nameSlotIndex = 0;
+            }
+        }
+        btnCounter = 2;
     }
 
     if (SW4_SWITCHED) {
         state = 6;
-    } else {
-        state = 5;
+        stateBefore = 5;
     }
+
+    draw_string(5, 110, letter0, 0);
+    draw_string(15, 110, letter1, 0);
+    draw_string(25, 110, letter2, 0);
+    
     display_update();
+    btnCounter--;
 }
 
 void highScores(void) {
@@ -296,6 +342,12 @@ void highScores(void) {
     draw_string(0, 80, itoaconv(75), 1);
     draw_string(0, 92, "AAA", 1);
     draw_string(0, 100, itoaconv(11), 1);
+
+    if(SW4_SWITCHED){
+        uint8_t temp = state;
+        state = stateBefore;
+        stateBefore = temp;
+    }
 
     display_update();
 }

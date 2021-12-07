@@ -12,7 +12,7 @@
 #if TMR2PERIOD > 0xffff
 #error "Timer period overflow."
 #endif
-
+#define RESTART_TIME 20
 
 int wall_left[128];
 int wall_right[128];
@@ -36,6 +36,7 @@ uint8_t stateBefore = 2;
 
 int gameOverCtr = 10;
 int gameArtCtr = 50;
+int restartCtr = 0;
 
 char playerName[] = "AAA";
 char letter0[1] = "A";
@@ -347,12 +348,14 @@ void gameOver(void) {
                 btnCounter = 2;
             }
             else if (BTN3_PRESSED) {
-                playerName[0] = letter0[0];
-                playerName[1] = letter1[0];
-                playerName[2] = letter2[0];
+                if (restartCtr > RESTART_TIME) {
+                    playerName[0] = letter0[0];
+                    playerName[1] = letter1[0];
+                    playerName[2] = letter2[0];
 
-                t = insert_highscore(playerName, score);
-                inserted = 1;
+                    t = insert_highscore(playerName, score);
+                    inserted = 1;
+                }
             }
 
         }
@@ -384,10 +387,14 @@ void gameOver(void) {
         state = 6;
         stateBefore = 5;
     }
-    if (BTN4_PRESSED) {
-        state = 1;
+    // restartCtr used to avoid accidental button presses
+    if (restartCtr > RESTART_TIME) {
+        if (BTN4_PRESSED) {
+            state = 1;
+            restartCtr = 0;
+        }
     }
-
+    restartCtr++;
     return;
 }
 

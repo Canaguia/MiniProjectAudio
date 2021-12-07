@@ -25,7 +25,7 @@ uint8_t playerInvCtr = 0;
 
 // Analog input variables
 #define AMP_MIN 300 // 220 
-#define AMP_MAX 900  //300
+#define AMP_MAX 1000  //300
 int analogIn = 0x288;
 
 // timer variables
@@ -88,7 +88,7 @@ void player_input() {
     analogIn = sample_analog();
     draw_string(5, 10, itoaconv(analogIn),1);
 
-    if (analogIn < AMP_MIN || analogIn > AMP_MAX) {
+    if (analogIn < AMP_MIN || analogIn > AMP_MAX || pressedBtn & 1) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
             playerUpVelocity++;
             inputcycles = 0;

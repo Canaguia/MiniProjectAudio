@@ -161,14 +161,7 @@ void draw_pixel(int x, int y, int colPix) {
 		int xOffset = x % 8;
 		int page = (x + 8) / 8;
 		int arrayPos = page * 128 - y;
-		
-		// HANDLE COLLISIONS WITH colPix
-		if (colPix & (canvas[arrayPos] & (1 << xOffset))) {
-			if (!playerInv) {
-				player_out_of_bounds();
-			}
-			return;
-		}
+
 		canvas[arrayPos] |= 1 << xOffset;
 	}
 	return;

@@ -57,6 +57,8 @@ void generate_walls(void);
 //Entities
 void entity_scroll(void);
 void render_entity(void);
+void check_entity_collision(void);
+void reset_entity_position(void);
 
 //Game-Sprites
 void draw_balloon3(int x, int y);
@@ -69,14 +71,15 @@ void draw_bird(int x, int y);
 void draw_pause(int x, int y);
 void draw_play(int x, int y);
 
-/* Declare lab-related functions from Render.c */
+/* Declare lab-related functions from Mipslabfunc */
 char * itoaconv( int num );
 void gameRunning(void);
 void quicksleep(int cyc);
 uint8_t pseudo_random(int max);
 
 // Highscore
-void display_highscores(char playerName[], int playerHighscore);
+void display_highscores();
+char insert_highscore(char playerName[], int playerHighscore);
 void clear_highscore_data(void);
 
 /* Declare display_debug - a function to help debugging.
@@ -120,7 +123,6 @@ void enable_interrupt(void);
 
 
 // SPRITE
-
 uint8_t const w;
 uint8_t const h;
 

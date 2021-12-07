@@ -14,8 +14,8 @@ uint8_t playerLives = 3;
 int inputcycles = 0;
 int playerUpVelocity = 0;
 int velocityBuffer = 0;
-#define playerUpVelocity_MAX 3
-#define playerUpVelocity_MIN -3
+#define playerUpVelocity_MAX 20
+#define playerUpVelocity_MIN -40
 #define coyote_time 30
 #define scroll_border 60
 #define death_border 122
@@ -25,7 +25,7 @@ uint8_t playerInvCtr = 0;
 
 // Analog input variables
 #define AMP_MIN 300 // 220 
-#define AMP_MAX 600  //300
+#define AMP_MAX 900  //300
 int analogIn = 0x288;
 
 // timer variables

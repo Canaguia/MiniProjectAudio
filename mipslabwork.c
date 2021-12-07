@@ -22,6 +22,7 @@ int playerHeight = 0;
 int playerFlashDur = 0;
 
 int tutorialHasBeenShown = 0;
+int inserted = 0;
 
 int gameStartCycle = 0;
 int gameRunningCycle = 0;
@@ -137,7 +138,6 @@ void labinit(void)
 
 
     // game init
-    populate_walls();
     //clear_highscore_data();
 
     return;
@@ -201,6 +201,7 @@ void gameRunning(void) {
 
     draw_walls();
     render_entity();
+    check_entity_collision();
 
     draw_player(); // important that player is drawn last
 
@@ -240,14 +241,21 @@ void gameStart(void) {
         animCycle = 0;
     }
 
-    gameStartCycle++;
-
     draw_string(9, 10, "AIR",1);
     draw_string(9, 20, "BAL",1);
     draw_string(5, 30, "LOON",1);
     draw_string(5, 116, "BTN1",1);
-
     draw_play(12, 100);
+
+    populate_walls();
+    reset_entity_position();
+
+    gameRunningCycle = 0;
+    score = 0;
+    playerLives = 3;
+    inserted = 0;
+
+    gameStartCycle++;
 
     if ((getbtns() & 1)) {
         if (tutorialHasBeenShown == 0) {
@@ -280,91 +288,102 @@ void gameTutorial(void) {
 }
 
 void gameOver(void) {
+    int i, t;
+    
     draw_string(0, 10, "GAME", 1);
     draw_string(0, 20, "OVER", 1);
 
     draw_string(0, 40, "SCR", 1);
     draw_string(0, 50, itoaconv(score), 1);
 
-    draw_string(0, 70, "NAME", 1);
 
-    int i;
-    for (i = 0; i < 7; i++) {
-        draw_pixel(i + 4, 100, 0);
-        draw_pixel(i + 14, 100, 0);
-        draw_pixel(i + 24, 100, 0);
-    }
 
-    if (btnCounter < 0) {
-        if (BTN1_PRESSED) {
-            switch (nameSlotIndex) {
-            case 0:
-                letter0[0]++;
-                if (letter0[0] > 65 + 25) {
-                    letter0[0] = 65;
-                }
-                break;
-            case 1:
-                letter1[0]++;
-                if (letter1[0] > 65 + 25) {
-                    letter1[0] = 65;
-                }
-                break;
-            case 2:
-                letter2[0]++;
-                if (letter2[0] > 65 + 25) {
-                    letter2[0] = 65;
-                }
-                break;
-            default:
-                break;
-            }
-            btnCounter = 2;
-        }
-        else if (BTN2_PRESSED) {
-            nameSlotIndex++;
-            if (nameSlotIndex > 2) {
-                nameSlotIndex = 0;
-            }
-            btnCounter = 2;
-        }
-        else if (BTN3_PRESSED) {
-            playerName[0] = letter0[0];
-            playerName[1] = letter1[0];
-            playerName[2] = letter2[0];
+    if (!inserted) {
+        t = 0;
+        draw_string(0, 70, "NAME", 1);
 
-            display_highscores(playerName, score);
-        }
+        // Draw lines under characters
         
+        for (i = 0; i < 7; i++) {
+            draw_pixel(i + 4, 100, 0);
+            draw_pixel(i + 14, 100, 0);
+            draw_pixel(i + 24, 100, 0);
+        }
+
+        if (btnCounter < 0) {
+            if (BTN1_PRESSED) {
+                switch (nameSlotIndex) {
+                case 0:
+                    letter0[0]++;
+                    if (letter0[0] > 65 + 25) {
+                        letter0[0] = 65;
+                    }
+                    break;
+                case 1:
+                    letter1[0]++;
+                    if (letter1[0] > 65 + 25) {
+                        letter1[0] = 65;
+                    }
+                    break;
+                case 2:
+                    letter2[0]++;
+                    if (letter2[0] > 65 + 25) {
+                        letter2[0] = 65;
+                    }
+                    break;
+                default:
+                    break;
+                }
+                btnCounter = 2;
+            }
+            else if (BTN2_PRESSED) {
+                nameSlotIndex++;
+                if (nameSlotIndex > 2) {
+                    nameSlotIndex = 0;
+                }
+                btnCounter = 2;
+            }
+            else if (BTN3_PRESSED) {
+                playerName[0] = letter0[0];
+                playerName[1] = letter1[0];
+                playerName[2] = letter2[0];
+
+                t = insert_highscore(playerName, score);
+                inserted = 1;
+            }
+
+        }
+        btnCounter--;
+
+        // draw letters
+        if ((nameSlotIndex == 0 && gameOverCtr < 5) || nameSlotIndex != 0)
+            draw_string(5, 90, letter0, 0);
+        if ((nameSlotIndex == 1 && gameOverCtr < 5) || nameSlotIndex != 1)
+            draw_string(15, 90, letter1, 0);
+        if ((nameSlotIndex == 2 && gameOverCtr < 5) || nameSlotIndex != 2)
+            draw_string(25, 90, letter2, 0);
+
+        draw_string(0, 110, "OK", 1);
+
+        gameOverCtr--;
+        if (gameOverCtr <= 0) {
+            gameOverCtr = 10;
+        }
+
     }
-    btnCounter--;
+    else if (t) {
+        draw_string(0, 70, "NEW", 1);
+        draw_string(0, 80, "HIGH", 1);
+        draw_string(0, 90, "SCR", 1);
+    }
 
     if (SW4_SWITCHED) {
         state = 6;
         stateBefore = 5;
     }
-
-    
     if (BTN4_PRESSED) {
-        state = 2;
-        gameRunningCycle = 0;
-        score = 0;
-        playerLives = 3;
+        state = 1;
     }
-
-    if((nameSlotIndex == 0 && gameOverCtr < 5) || nameSlotIndex != 0)
-        draw_string(5, 90, letter0, 0);
-    if((nameSlotIndex == 1 && gameOverCtr < 5) || nameSlotIndex != 1)
-        draw_string(15, 90, letter1, 0);
-    if((nameSlotIndex == 2 && gameOverCtr < 5) || nameSlotIndex != 2)
-        draw_string(25, 90, letter2, 0);
-
-    gameOverCtr--;
-    if(gameOverCtr <= 0){
-        gameOverCtr = 10;
-    }
-    
-        draw_string(0, 110, "OK", 1);
 
     return;
 }
@@ -376,7 +395,8 @@ void highScores(void) {
     for (i = 0; i < 31; i++) {
         draw_pixel(i, 10, 0);
     }
-    display_highscores("NUL", 0);
+
+    display_highscores();
 
     if (!(getsw() & 8)) {
         state = 5;

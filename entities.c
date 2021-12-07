@@ -34,7 +34,7 @@ void spawn_entity() {
 void render_entity() {
 	int i;
 
-	for (i = 0; i <= 10; i++) {
+	for (i = 0; i <= MAX_OBS; i++) {
 		draw_bird(obsPos[i][0], obsPos[i][1]); // change to render sometin
 	}
 
@@ -47,8 +47,10 @@ void entity_scroll() {
 	draw_string(0, 20, itoaconv(obsSpawnCooldownCtr), 1);
 	draw_string(0, 30, itoaconv(obsSpawnCooldown), 1);
 
-	for (i = 0; i <= 10; i++) {
-		obsPos[i][1]++; // scroll by incr. y-level
+	for (i = 0; i <= MAX_OBS; i++) {
+		if (obsPos[i][1] < 130) {
+			obsPos[i][1]++; // scroll by incr. y-level
+		}
 	}
 
 	obsSpawnCooldownCtr-= pseudo_random(obsSpawnCooldown/10);
@@ -60,35 +62,13 @@ void entity_scroll() {
 	return;
 }
 
-/* check if an entity has collided with the player */
-void check_entity_collision() {
-	int i;
-
-	for (i = 0; i <= 10; i++) {
-		if (check_collision_box(obs[i][0], obs[i][1], OBS_W, OBS_H, currentX, currentY, playerWidth, playerHeight)) {
-			player_out_of_bounds();
-		}
-	}
-	return;
-}
-
-/* reset position of all entities */
-void rest_entity_position() {
-	for (i = 0; i < (sizeof(obsPos) / sizeof(uint8_t)); i += 2)
-	{
-		obsPos[i][0] = 50;
-		obsPos[i][1] = 0;
-	}
-	return;
-}
-
 /* check if two boxes collide */
 char check_collision_box(int x, int y, int w, int h, int px, int py, int pw, int ph) {
 
 	if (x < px + pw &&
 		x + w > px &&
-		u < py + ph &&
-		h + y > py) 
+		y < py + ph &&
+		y + h > py)
 	{
 		return 1;
 	}
@@ -99,10 +79,38 @@ char check_collision_box(int x, int y, int w, int h, int px, int py, int pw, int
 char check_collision_circle(int x, int y, int r, int px, int py, int pr) {
 	int max = r + pr;
 
-	if ( (x - px)*(x - px) + (y - py)*(y - py) < (max * max))
+	if ((x - px) * (x - px) + (y - py) * (y - py) < (max * max))
 	{
 		return 1;
 	}
 	return 0;
 }
+
+/* check if an entity has collided with the player */
+void check_entity_collision() {
+	int i;
+
+	for (i = 0; i <= 10; i++) {
+		if (check_collision_box(obsPos[i][0], obsPos[i][1], OBS_W, OBS_H, currentX, currentY, playerWidth, playerHeight)) {
+			if (!playerInv) {
+				player_out_of_bounds();
+			}
+		}
+	}
+	return;
+}
+
+/* reset position of all entities */
+void reset_entity_position() {
+	int i;
+
+	for (i = 0; i < (sizeof(obsPos) / sizeof(uint8_t)); i += 2)
+	{
+		obsPos[i][0] = 50;
+		obsPos[i][1] = 0;
+	}
+	return;
+}
+
+
 

@@ -5,7 +5,7 @@
 #define EEPROM_ADDR 0x50
 #define totalHighscores 25
 
-uint16_t memAddress = 0x1200;
+uint16_t memAddress = 0x0000;
 
 
 /* Wait for I2C bus to become idle */
@@ -133,19 +133,18 @@ void clear_highscore_data() {
 	return;
 }
 
-/* load, compare and display all highscores (top 5) */
-void display_highscores(char playerName[], int playerHighscore) {
+/* checks if a given highscore is in the top 5 and then loads it into non-volatile EEPROM memory
+	returns 1 if highscore got put into top 5, returns 0 if not*/
+char insert_highscore(char playerName[], int playerHighscore) {
 	int i;
-	char textstring[3];
 	int highscore = 0;
-	uint8_t t;
 
 	// read highscores from EEPROM storage and put them into 2D-array
 	char charArr[6 * 3];
 	int scoreArr[6];
 	uint8_t tempArr[totalHighscores];
 	read_highscore(memAddress, totalHighscores, tempArr);
-	for (i = 0; i <= 5; i++) {
+	for (i = 0; i < 5; i++) {
 		//store 3-char as string
 		charArr[i * 3] = (char)tempArr[i * 5];
 		charArr[i * 3 + 1] = (char)tempArr[i * 5 + 1];
@@ -177,7 +176,7 @@ void display_highscores(char playerName[], int playerHighscore) {
 	charArr[r * 3 + 2] = playerName[2];
 
 	// write top 5 into EEPROM storage
-	for (i = 0; i <= 5; i++) {
+	for (i = 0; i < 5; i++) {
 		//load 3-char string
 		tempArr[i * 5] = (uint8_t)charArr[i * 3];
 		tempArr[i * 5 + 1] = (uint8_t)charArr[i * 3 + 1];
@@ -189,6 +188,34 @@ void display_highscores(char playerName[], int playerHighscore) {
 	}
 	write_highscore(memAddress, totalHighscores, tempArr);
 
+	if (r >= 5) {
+		return 0;
+	}
+	return 1;
+}
+
+/* load, compare and display all highscores (top 5) */
+void display_highscores() {
+	int i;
+	int highscore = 0;
+
+	// read highscores from EEPROM storage and put them into 2D-array
+	char charArr[6 * 3];
+	int scoreArr[6];
+	uint8_t tempArr[totalHighscores];
+	read_highscore(memAddress, totalHighscores, tempArr);
+	for (i = 0; i < 5; i++) {
+		//store 3-char as string
+		charArr[i * 3] = (char)tempArr[i * 5];
+		charArr[i * 3 + 1] = (char)tempArr[i * 5 + 1];
+		charArr[i * 3 + 2] = (char)tempArr[i * 5 + 2];
+
+		//store MSB & LSB as highscore;
+		highscore = (tempArr[i * 5 + 3] << 8);
+		highscore |= tempArr[i * 5 + 4];
+		scoreArr[i] = highscore;
+	}
+
 	// use itoa to convert top 5 to decimal string && print
 	char name[] = "   ";
 	for (i = 0; i < 5; i++) {
@@ -198,5 +225,6 @@ void display_highscores(char playerName[], int playerHighscore) {
 		draw_string(8, 12 + 20*i, name,1);
 		draw_string(10, 20 + 20*i, itoaconv(scoreArr[i]),1);
 	}
-	display_update();
+
+	return;
 }

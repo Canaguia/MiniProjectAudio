@@ -15,7 +15,7 @@ uint8_t spi_send_recv(uint8_t data);
 // Canvas
 uint8_t canvas[512];
 void draw_pixel(int x, int y, int colPix);
-void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t *data);
+void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t data[]);
 void draw_string(uint8_t x, uint8_t y, char *str, char centered);
 void draw_int(uint8_t x, uint8_t y, int num);
 void display_canvas(void);
@@ -117,3 +117,11 @@ void time2string( char *, int );
 int getbtns(void);
 int getsw(void);
 void enable_interrupt(void);
+
+
+// SPRITE
+
+uint8_t const w;
+uint8_t const h;
+
+uint8_t uphi_art[4096];

@@ -33,6 +33,9 @@ int btnCounter = 2;
 uint8_t nameSlotIndex = 0;
 uint8_t stateBefore = 2;
 
+int gameOverCtr = 10;
+int gameArtCtr = 50;
+
 char playerName[] = "AAA";
 char letter0[1] = "A";
 char letter1[1] = "A";
@@ -178,6 +181,15 @@ void draw_player() {
     return;
 }
 
+void gameArt(void){
+    if(gameArtCtr >= 0){
+        draw_sprite(0,0,w,h,uphi_art);
+    } else{
+        state = 1;
+    }
+    gameArtCtr--;
+}
+
 void gameRunning(void) {
     draw_string(1, 1, itoaconv(score),1);
     // pause logic
@@ -246,6 +258,10 @@ void gameStart(void) {
             state = 2;
         }
     }
+
+    if (BTN2_PRESSED){
+        state = 5;
+    }
     if (getsw() & 8) {
         state = 6;
     }
@@ -270,13 +286,13 @@ void gameOver(void) {
     draw_string(0, 40, "SCR", 1);
     draw_string(0, 50, itoaconv(score), 1);
 
-    draw_string(0, 90, "NAME", 1);
+    draw_string(0, 70, "NAME", 1);
 
     int i;
     for (i = 0; i < 7; i++) {
-        draw_pixel(i + 4, 120, 0);
-        draw_pixel(i + 14, 120, 0);
-        draw_pixel(i + 24, 120, 0);
+        draw_pixel(i + 4, 100, 0);
+        draw_pixel(i + 14, 100, 0);
+        draw_pixel(i + 24, 100, 0);
     }
 
     if (btnCounter < 0) {
@@ -336,11 +352,20 @@ void gameOver(void) {
         playerLives = 3;
     }
 
-    draw_string(5, 110, letter0, 0);
-    draw_string(15, 110, letter1, 0);
-    draw_string(25, 110, letter2, 0);
+    if((nameSlotIndex == 0 && gameOverCtr < 5) || nameSlotIndex != 0)
+        draw_string(5, 90, letter0, 0);
+    if((nameSlotIndex == 1 && gameOverCtr < 5) || nameSlotIndex != 1)
+        draw_string(15, 90, letter1, 0);
+    if((nameSlotIndex == 2 && gameOverCtr < 5) || nameSlotIndex != 2)
+        draw_string(25, 90, letter2, 0);
 
+    gameOverCtr--;
+    if(gameOverCtr <= 0){
+        gameOverCtr = 10;
+    }
     
+        draw_string(0, 110, "OK", 1);
+
     return;
 }
 
@@ -362,7 +387,10 @@ void highScores(void) {
 void masterGameLoop() {
     if (TMR2 == 0) {
         clear_canvas();
-        if (state == 1) {
+        if (state == 0){
+            gameArt();
+        }
+        else if (state == 1) {
             gameStart();
         }
         else if (state == 2) {

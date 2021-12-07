@@ -10,7 +10,7 @@
 #define playerWidth 5
 #define playerHeight 7
 
-uint8_t obsPos[10][2] = {50,0,50,0,50,0,50,0,50,0,50,0,50,0,50,0,50,0,50,0}; // spawn them out of view
+uint8_t obsPos[10][3]; // spawn them out of view
 uint8_t obsSpawnCtr = 0;
 uint8_t obsSpawnCooldown = DEF_OBS_COOLDOWN;
 int obsSpawnCooldownCtr = DEF_OBS_COOLDOWN;
@@ -19,9 +19,10 @@ int obsSpawnCooldownCtr = DEF_OBS_COOLDOWN;
 void spawn_entity() {
 	int x;
 
-	x = pseudo_random(4);
-	obsPos[obsSpawnCtr][0] = 8 * x; // x	
+	x = pseudo_random(3);
+	obsPos[obsSpawnCtr][0] = 4 + 8 * x; // x	
 	obsPos[obsSpawnCtr][1] = 0; // y
+	obsPos[obsSpawnCtr][2] = 0; // anim frame
 
 	obsSpawnCtr++;
 	if (obsSpawnCtr == MAX_OBS) {
@@ -35,7 +36,22 @@ void render_entity() {
 	int i;
 
 	for (i = 0; i <= MAX_OBS; i++) {
-		draw_bird(obsPos[i][0], obsPos[i][1]); // change to render sometin
+		switch (obsPos[i][2]) {
+		case 0:
+			draw_sprite(obsPos[i][0], obsPos[i][1], 9, 9, shruiken[0]);
+			obsPos[i][2]++;
+			break;
+		case 1:
+			draw_sprite(obsPos[i][0], obsPos[i][1], 9, 9, shruiken[1]);
+			obsPos[i][2]++;
+			break;
+		case 2:
+			draw_sprite(obsPos[i][0], obsPos[i][1], 9, 9, shruiken[2]);
+			obsPos[i][2] = 0;
+			break;
+		default:
+			break;
+		}
 	}
 
 	return;
@@ -44,21 +60,19 @@ void render_entity() {
 /* Scroll all entities */
 void entity_scroll() {
 	int i;
-	draw_string(0, 20, itoaconv(obsSpawnCooldownCtr), 1);
-	draw_string(0, 30, itoaconv(obsSpawnCooldown), 1);
+	// draw_string(0, 20, itoaconv(obsSpawnCooldownCtr), 1);
+	// draw_string(0, 30, itoaconv(obsSpawnCooldown), 1);
 
 	for (i = 0; i <= MAX_OBS; i++) {
 		if (obsPos[i][1] < 130) {
 			obsPos[i][1]++; // scroll by incr. y-level
 		}
 	}
-
-	
 	obsSpawnCooldownCtr--;
 
 	if (obsSpawnCooldownCtr <= 0) {
 		if (obsSpawnCooldown > 20) {
-			obsSpawnCooldown--;
+			obsSpawnCooldown -= 10;
 		}
 		obsSpawnCooldownCtr = obsSpawnCooldown;
 		obsSpawnCooldownCtr += pseudo_random(10);
@@ -109,10 +123,11 @@ void check_entity_collision() {
 void reset_entity_position() {
 	int i;
 
-	for (i = 0; i < MAX_OBS*2; i += 2)
+	for (i = 0; i < MAX_OBS; i ++)
 	{
 		obsPos[i][0] = 50;
 		obsPos[i][1] = 0;
+		obsPos[i][2] = 99;
 	}
 	return;
 }

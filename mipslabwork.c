@@ -182,12 +182,25 @@ void draw_player() {
 }
 
 void gameArt(void){
-    if(gameArtCtr >= 0){
-        draw_sprite(0,0,w,h,uphi_art);
-    } else{
-        state = 1;
-    }
+    // if(gameArtCtr >= 0){
+    //     (((gameArtCtr / 2) % 2 == 1) ? draw_sprite(0,0,32,128,uphi_art) : draw_sprite(0,0,32,128,uphi_art2));
+    // } else{
+    //     state = 1;
+    // }
+
+    // sprite_anim(12, 5, 9, 9, gameArtCtr, 3, shruiken);
+
+    // if(gameArtCtr % 3 == 0){
+    //     draw_sprite(12,5,9,9, shruiken);
+    // } else if (gameArtCtr % 3 == 1){
+    //     draw_sprite(12,5,9,9, shruiken2);
+    // } else if (gameArtCtr % 3 == 2){
+    //     draw_sprite(12,5,9,9, shruiken3);
+    // }
+
     gameArtCtr--;
+
+
 }
 
 void gameRunning(void) {

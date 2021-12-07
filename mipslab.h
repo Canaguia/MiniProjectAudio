@@ -121,7 +121,6 @@ void enable_interrupt(void);
 
 // SPRITE
 
-uint8_t const w;
-uint8_t const h;
+uint8_t uphi_art[2][4096];
 
-uint8_t uphi_art[4096];
+uint8_t shruiken[3][81];

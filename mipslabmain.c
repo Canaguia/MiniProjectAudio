@@ -11,7 +11,7 @@
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
 
-uint8_t state = 0;
+uint8_t state = 1;
 
 int main(void) {
     /*

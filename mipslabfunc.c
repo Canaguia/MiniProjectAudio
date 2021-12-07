@@ -47,98 +47,7 @@ void quicksleep(int cyc) {
    repeated calls to display_image; display_image overwrites
    about half of the digits shown by display_debug.
 */   
-void display_debug( volatile int * const addr )
-{
-  display_string( 1, "Addr" );
-  display_string( 2, "Data" );
-  num32asc( &textbuffer[1][6], (int) addr );
-  num32asc( &textbuffer[2][6], *addr );
-  display_update();
-}
 
-uint8_t spi_send_recv(uint8_t data) {
-	while(!(SPI2STAT & 0x08));
-	SPI2BUF = data;
-	while(!(SPI2STAT & 1));
-	return SPI2BUF;
-}
-
-void display_init(void) {
-    DISPLAY_CHANGE_TO_COMMAND_MODE;
-    quicksleep(10);
-	DISPLAY_ACTIVATE_VDD;
-    quicksleep(1000000);
-
-    spi_send_recv(0xAE);
-	DISPLAY_ACTIVATE_RESET;
-    quicksleep(10);
-	DISPLAY_DO_NOT_RESET;
-    quicksleep(10);
-
-    spi_send_recv(0x8D);
-    spi_send_recv(0x14);
-
-    spi_send_recv(0xD9);
-    spi_send_recv(0xF1);
-
-	DISPLAY_ACTIVATE_VBAT;
-    quicksleep(10000000);
-
-    spi_send_recv(0xA1);
-    spi_send_recv(0xC8);
-
-    spi_send_recv(0xDA);
-    spi_send_recv(0x20);
-	
-	spi_send_recv(0x20);
-	spi_send_recv(0x0);
-
-    spi_send_recv(0xAF);
-	quicksleep(100);
-	/* Change to data mode */
-	DISPLAY_CHANGE_TO_DATA_MODE;
-}
-
-void display_string(int line, char *s) {
-	int i;
-	if(line < 0 || line >= 4)
-		return;
-	if(!s)
-		return;
-	
-	for(i = 0; i < 16; i++)
-		if(*s) {
-			textbuffer[line][i] = *s;
-			s++;
-		} else
-			textbuffer[line][i] = ' ';
-}
-
-void display_image(int x, const uint8_t *data) {
-	int i, j;
-	
-	for(i = 0; i < 4; i++) {
-		DISPLAY_CHANGE_TO_COMMAND_MODE;
-
-		spi_send_recv(0x22);
-		spi_send_recv(i);
-		
-		spi_send_recv(x & 0xF);
-		spi_send_recv(0x10 | ((x >> 4) & 0xF));
-		
-		DISPLAY_CHANGE_TO_DATA_MODE;
-		
-		for(j = 0; j < 32; j++)
-			spi_send_recv(~data[i*32 + j]);
-	}
-}
-
-void display_update(void){
-	int i;
-	for(i = 0; i < CANVAS_ARRAY_SIZE; i++){
-		spi_send_recv(canvas[i]);
-	}
-}
 
 /* Helper function, local to this file.
    Converts a number to hexadecimal ASCII digits. */
@@ -150,86 +59,9 @@ static void num32asc( char * s, int n )
 }
 
 
-/* OLED DISPLAY FUNCTIONS */
-/* Function that handles drawing a canvas, used for plotting graphs */
 
-// static uint8_t canvas[128 * 4] = { 0 }; // 128*32 (represents pixel grid as an array of unsigned 8-bit integers)
 
-/* sets the pixel at the specified row and column to "ON" */
-void draw_pixel(int x, int y, int colPix) {
-	if(x < 32 && x >= 0 && y < 128 && y >= 0 ){
-		int xOffset = x % 8;
-		int page = (x + 8) / 8;
-		int arrayPos = page * 128 - y;
-		
-		// HANDLE COLLISIONS WITH colPix
-		if (colPix & (canvas[arrayPos] & (1 << xOffset))) {
-			if (!playerInv) {
-				player_out_of_bounds();
-			}
-			return;
-		}
-		canvas[arrayPos] |= 1 << xOffset;
-	}
-	return;
-}
 
-void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
-
-	const char* i;
-	uint8_t strLength = 0;
-	if (centered == 1) {
-		const char* a;
-		for (a = str; *a != '\0'; a++) {
-			strLength++;
-		}
-		if (strLength == 1) x = 14;
-		else if (strLength == 2) x = 11;
-		else if (strLength == 3) x = 8;
-		else if (strLength == 4) x = 5;
-		else x = 0;
-	}
-
-	for (i = str; *i != '\0'; i++) {
-		char c = *i;
-		/* Dont draw outside the screen */
-
-		// if(c == 32) {
-		//  x += 4;
-		//  continue;
-		// }
-
-		int j;
-		for (j = 0; j < 5; j++) {
-			uint8_t data;
-			if (c >= 65 && c <= 90) {
-				data = charArray[(c - 65) * 5 + j];
-			}
-			else if (c >= 48 && c <= 58) {
-				data = charArray[(c - 48 + 26) * 5 + j];
-			}
-			int k;
-			for (k = 0; k < 8; k++) {
-				if (data & 0x01) {
-					draw_pixel(x + j, y + k, 0);
-				}
-				data = data >> 1;
-			}
-		}
-		x += 7;
-	}
-}
-
-void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t data[]) {
-	int i, j;
-	for(i = 0; i < dx; i++){
-		for(j = 0; j < dy; j++){
-			if(data[j*dx + i]){
-				draw_pixel(x + i, y + j, 0);
-			}
-		}
-	}
-}
 
 /* display the current saved canvas where each bit represents a pixel on the screen */
 void display_canvas(void) {
@@ -258,12 +90,9 @@ void display_canvas(void) {
 }
 
 /* TEMPORARY */
-void clear_canvas() {
-	int i;
-	for (i = 0; i < CANVAS_ARRAY_SIZE; i++) {
-		canvas[i] = 0;
-	}
-}
+
+
+
 
 /*
  * itoa

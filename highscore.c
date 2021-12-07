@@ -191,7 +191,7 @@ void display_highscores(char playerName[], int playerHighscore) {
 
 	// use itoa to convert top 5 to decimal string && print
 	char name[] = "   ";
-	for (i = 0; i <= 5; i++) {
+	for (i = 0; i < 5; i++) {
 		name[0] = charArr[i * 3];
 		name[1] = charArr[i * 3 + 1];
 		name[2] = charArr[i * 3 + 2];

@@ -63,7 +63,6 @@ void playerMoveLeft(void){
     }
 }
     
-
 void player_input() {
     //move left, move right
     int pressedBtn = getbtns();

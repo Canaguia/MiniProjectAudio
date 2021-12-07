@@ -197,10 +197,11 @@ void gameRunning(void) {
         state = 3;
     }
     
-    player_input();
-
     draw_walls();
     render_entity();
+
+    player_input();
+
     check_entity_collision();
 
     draw_player(); // important that player is drawn last
@@ -254,6 +255,8 @@ void gameStart(void) {
     score = 0;
     playerLives = 3;
     inserted = 0;
+    currentX = 15;
+    currentY = 80;
 
     gameStartCycle++;
 

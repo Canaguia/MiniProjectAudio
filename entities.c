@@ -19,7 +19,7 @@ int obsSpawnCooldownCtr = DEF_OBS_COOLDOWN;
 void spawn_entity() {
 	int x;
 
-	x = pseudo_random(3);
+	x = pseudo_random(4);
 	obsPos[obsSpawnCtr][0] = 8 * x; // x	
 	obsPos[obsSpawnCtr][1] = 0; // y
 
@@ -53,10 +53,15 @@ void entity_scroll() {
 		}
 	}
 
-	obsSpawnCooldownCtr-= pseudo_random(obsSpawnCooldown/10);
+	
+	obsSpawnCooldownCtr--;
+
 	if (obsSpawnCooldownCtr <= 0) {
-		obsSpawnCooldown--;
+		if (obsSpawnCooldown > 20) {
+			obsSpawnCooldown--;
+		}
 		obsSpawnCooldownCtr = obsSpawnCooldown;
+		obsSpawnCooldownCtr += pseudo_random(10);
 		spawn_entity();
 	}
 	return;
@@ -104,7 +109,7 @@ void check_entity_collision() {
 void reset_entity_position() {
 	int i;
 
-	for (i = 0; i < (sizeof(obsPos) / sizeof(uint8_t)); i += 2)
+	for (i = 0; i < MAX_OBS*2; i += 2)
 	{
 		obsPos[i][0] = 50;
 		obsPos[i][1] = 0;

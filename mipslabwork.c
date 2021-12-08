@@ -48,7 +48,7 @@ void user_isr(void) {
     return;
 }
 
-/* Returns a pseudorandom int based on the timer value and a given 0-max range (not included)*/
+/* Returns a pseudorandom int based on the timer value and a given 0-max range (not included) */
 uint8_t pseudo_random(int max) {
     volatile uint8_t x;
     //n = (TMR2 >> 1);
@@ -139,6 +139,7 @@ void labinit(void)
 
     // game init
     //clear_highscore_data();
+    analogBaseline = sample_average();
 
     return;
 }
@@ -267,6 +268,7 @@ void gameStart(void) {
             tutorialHasBeenShown = 1;
         }
         else {
+            analogBaseline = sample_average();
             state = 2;
         }
     }

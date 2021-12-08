@@ -14,9 +14,9 @@ uint8_t playerLives = 3;
 int inputcycles = 0;
 int playerUpVelocity = 0;
 int velocityBuffer = 0;
-#define playerUpVelocity_MAX 20
-#define playerUpVelocity_MIN -40
-#define coyote_time 30
+#define playerUpVelocity_MAX 10
+#define playerUpVelocity_MIN -10
+#define coyote_time 50
 #define scroll_border 60
 #define death_border 122
 
@@ -24,9 +24,12 @@ uint8_t playerInv = 0;
 uint8_t playerInvCtr = 0;
 
 // Analog input variables
-#define AMP_MIN 300 // 220 
-#define AMP_MAX 1000  //300
+#define ampBuffer_MAX 10
+#define AMP_MIN 150 // 220 
 int analogIn = 0x288;
+int analogBaseline = 0x288;
+int ampVal = 0;
+int ampBuffer = 0;
 
 // timer variables
 int timerCycles;
@@ -37,6 +40,40 @@ int sample_analog(void){
     while (!(AD1CON1 & (0x1 << 1))); // SAMP
     while (!(AD1CON1 & 0x1)); // DONE
     return ADC1BUF0;
+}
+
+int sample_average(void) {
+    int i, a;
+    a = 0;
+    for (i = 0; i < 100; i++) {
+        a += sample_analog();
+        quicksleep(20);
+    }
+    return (a / 100);
+}
+
+// takes greatest amplitude in last n-cycles
+void aggregate_volume() {
+    int a;
+    analogIn = sample_analog();
+    a = analogIn - analogBaseline;
+
+    // absolute value gives amplitude of wave
+    if (a < 0) {
+        a = a * -1;
+    }
+
+    // if greater than current held value swap
+    if (a > ampVal) {
+        ampVal = a;
+        ampBuffer = 0;
+    }
+    else if (ampBuffer >= ampBuffer_MAX) {
+        ampVal = 0;
+    }
+    ampBuffer++;
+
+    return;
 }
 
 void playerMoveUp(void){
@@ -66,6 +103,7 @@ void playerMoveLeft(void){
 void player_input() {
     //move left, move right
     int pressedBtn = getbtns();
+    int a;
     
     if (pressedBtn){
         //BTN1
@@ -85,10 +123,11 @@ void player_input() {
             playerMoveRight();
         }
     }
-    analogIn = sample_analog();
-    draw_string(5, 10, itoaconv(analogIn),1);
 
-    if (analogIn < AMP_MIN || analogIn > AMP_MAX || pressedBtn & 1) {
+    aggregate_volume();
+    draw_string(5, 10, itoaconv(ampVal),1);
+
+    if (ampVal > AMP_MIN || pressedBtn & 1) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
             playerUpVelocity++;
             inputcycles = 0;
@@ -120,7 +159,7 @@ void player_input() {
             if (currentY > death_border) {
                 player_out_of_bounds();
             }
-            else {
+            else if (inputcycles > coyote_time) {
                 currentY++;
                 velocityBuffer = 0;
             }

@@ -43,6 +43,7 @@ extern uint8_t currentX;
 extern uint8_t playerInv;
 extern uint8_t playerInvCtr;
 extern uint8_t playerLives;
+extern int analogBaseline;
 
 void playerMovement(void);
 void playerMoveUp(void);
@@ -51,6 +52,7 @@ void playerMoveLeft(void);
 void playerMoveRight(void);
 
 void player_out_of_bounds(void);
+int sample_average(void);
 
 //Walls
 void generate_walls(void);

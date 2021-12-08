@@ -136,6 +136,7 @@ void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
 void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t data[]) {
 	int i, j;
 	for(i = 0; i < dx; i++){
+
 		for(j = 0; j < dy; j++){
 			if(data[j*dx + i]){
 				draw_pixel(x + i, y + j, 0);
@@ -144,11 +145,11 @@ void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t data[]) {
 	}
 }
 
-void sprite_anim(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, int ctr, uint8_t frame_nr, uint8_t **sprite_array){
+void sprite_anim(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, int ctr, uint8_t frame_nr, uint8_t *sprite_array){
     int i;
     for(i = 0; i < frame_nr; i++){
         if(ctr % frame_nr == i){
-            draw_sprite(x,y,dx,dy,sprite_array[i]);
+            draw_sprite(x,y,dx,dy,sprite_array + dx*dy*i);
         }
     }
 }

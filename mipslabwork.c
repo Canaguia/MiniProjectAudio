@@ -125,7 +125,7 @@ void labinit(void)
 
     /* Set up output pins */
     ODCE = 0x0;
-    TRISESET = 0xFF;
+    TRISECLR = 0x00;
 
     /* Set up i2c */
     I2C1CON = 0x0;
@@ -225,7 +225,6 @@ void gamePaused(void) {
 }
 
 void gameStart(void) {
-
     animCycle = gameStartCycle / 100;
 
     if ((animCycle) % 4 == 0) {
@@ -295,6 +294,7 @@ void gameTutorial(void) {
 
 void gameOver(void) {
     int i, t;
+    PORTE = 0x00;
     
     draw_string(0, 10, "GAME", 1);
     draw_string(0, 20, "OVER", 1);

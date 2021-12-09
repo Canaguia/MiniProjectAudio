@@ -47,9 +47,27 @@ int sample_average(void) {
     a = 0;
     for (i = 0; i < 100; i++) {
         a += sample_analog();
-        quicksleep(20);
+        quicksleep(100);
     }
     return (a / 100);
+}
+
+// update LED's to show new volume w
+void led_disp_volume(int max) {
+    int a = (((ampVal) * 8) / max);
+    int i;
+    if (a == 0) {
+        return;
+    }
+    for (i = 0; i < 8; i++) {
+        if (a > i) {
+            setled(7-i);
+        }
+        else {
+            clearled(7-i);
+        }
+    }
+    return;
 }
 
 // takes greatest amplitude in last n-cycles
@@ -72,6 +90,9 @@ void aggregate_volume() {
         ampVal = 0;
     }
     ampBuffer++;
+
+    // display ampVal
+    led_disp_volume(AMP_MIN);
 
     return;
 }

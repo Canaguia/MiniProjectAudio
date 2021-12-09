@@ -123,6 +123,8 @@ void time2string( char *, int );
 int getbtns(void);
 int getsw(void);
 void enable_interrupt(void);
+void setled(uint8_t numLed);
+void clearled(uint8_t numLed);
 
 
 // SPRITE

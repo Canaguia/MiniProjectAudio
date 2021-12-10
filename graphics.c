@@ -19,7 +19,7 @@ static void num32asc(char* s, int);
 
 #define CANVAS_ARRAY_SIZE 512
 
-// This function sends data into 
+// This function sends data into the
 uint8_t spi_send_recv(uint8_t data) {
 	
 	// Wait for transmitter to be ready

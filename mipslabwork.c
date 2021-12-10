@@ -136,7 +136,7 @@ void labinit(void)
     temp = I2C1RCV; //Clear receive buffer
 
     // game init (uncomment to clear highscore-data)
-    clear_highscore_data();
+    // clear_highscore_data();
     analogBaseline = sample_average();
 
     return;

@@ -133,6 +133,3 @@ void reset_entity_position() {
 	}
 	return;
 }
-
-
-

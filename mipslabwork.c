@@ -8,7 +8,7 @@
 #include "mipslab.h"  /* Declatations for this project */
 
 // DEFINE CONSTANTS
-#define TMR2PERIOD ((80000000/256)/(20)) // bit-clock: 16khz-> bits-trans: 8khz -> samples: 1khz (/8000 and 1:1) (now /128000 8khz) (8*2*2*16000)(80000000/256)/100)
+#define TMR2PERIOD ((80000000/256)/(20))
 #if TMR2PERIOD > 0xffff
 #error "Timer period overflow."
 #endif
@@ -106,7 +106,7 @@ void labinit(void)
     PR3 = TMR3PERIOD; 
     T3CONSET = (0x1 << 15); 
 
-    // HANDLE ANALOG INPUT
+    // Establish Analog Input
     /* PORTB.4 is analog pin A1*/
 	AD1PCFG = ~(1 << 4);
 	TRISBSET = (1 << 4);
@@ -121,7 +121,7 @@ void labinit(void)
     /* Turn on ADC */
     AD1CON1 |= (0x1 << 15);
 
-    /* Set up output pins */
+    /* Set up LED-output pins */
     ODCE = 0x0;
     TRISECLR = 0xFF;
 
@@ -135,8 +135,8 @@ void labinit(void)
     I2C1CONSET = 1 << 15; // ON = 1 (turn on)
     temp = I2C1RCV; //Clear receive buffer
 
-    // game init
-    //clear_highscore_data();
+    // game init (uncomment to clear highscore-data)
+    clear_highscore_data();
     analogBaseline = sample_average();
 
     return;
@@ -219,7 +219,7 @@ void gameRunning(void) {
     draw_player();
 
     // pause logic
-    if (getsw() & 1) {
+    if (SW1_SWITCHED) {
         state = 3;
     }
     // game over
@@ -232,7 +232,7 @@ void gameRunning(void) {
 /* Pauses game logic,
    Accessible while the game is running*/
 void gamePaused(void) {
-    if (SW1_SWITCHED)) {
+    if (!(SW1_SWITCHED)) {
         state = 2;
     }
 
@@ -445,7 +445,7 @@ void highScores(void) {
 
     display_highscores();
 
-    if (SW4_SWITCHED) {
+    if (!(SW4_SWITCHED)) {
         state = stateBefore;
     }
     return;

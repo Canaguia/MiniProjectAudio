@@ -5,7 +5,7 @@
 #define EEPROM_ADDR 0x50
 #define totalHighscores 25
 
-uint16_t memAddress = 0x0000;
+uint16_t memAddress = 0x0000; // accepts addresses up to 3FFF
 
 
 /* Helper functions provided by hello-temperature example project: */
@@ -210,12 +210,12 @@ void display_highscores() {
 	uint8_t tempArr[totalHighscores];
 	read_highscore(memAddress, totalHighscores, tempArr);
 	for (i = 0; i < 5; i++) {
-		//store 3-char as string
+		// store 3-char as string
 		charArr[i * 3] = (char)tempArr[i * 5];
 		charArr[i * 3 + 1] = (char)tempArr[i * 5 + 1];
 		charArr[i * 3 + 2] = (char)tempArr[i * 5 + 2];
 
-		//store MSB & LSB as highscore;
+		// store MSB & LSB as highscore;
 		highscore = (tempArr[i * 5 + 3] << 8);
 		highscore |= tempArr[i * 5 + 4];
 		scoreArr[i] = highscore;

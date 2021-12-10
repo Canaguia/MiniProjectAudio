@@ -1,8 +1,8 @@
 /* mipslabfunc.c
    This file written 2015 by F Lundevall
    Some parts are original code written by Axel Isaksson
-
-   For copyright and licensing, see file COPYING */
+   some parts are original code written by Filip Karlsson & Umut Sina Kenes
+*/
 
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
@@ -18,6 +18,7 @@ uint8_t pseudo_random(int max) {
     randomSpice = x;
     return (x % max);
 }
+
 
 
 /* CODE FROM LABS:*/

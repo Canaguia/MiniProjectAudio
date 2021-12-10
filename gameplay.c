@@ -42,6 +42,7 @@ int sample_analog(void){
     return ADC1BUF0;
 }
 
+/* Takes an average analog input over a period of time */
 int sample_average(void) {
     int i, a;
     a = 0;
@@ -54,7 +55,7 @@ int sample_average(void) {
 
 // update LED's to show new volume w
 void led_disp_volume(int max) {
-    int a = (((ampVal) * 8) / max);
+    int a = (((ampVal) * 7) / max);
     int i;
     if (a == 0) {
         return;

@@ -298,7 +298,8 @@ void gameStart(void) {
     if (BTN2_PRESSED){
         state = 5;
     }
-    if (getsw() & 8) {
+    if (SW4_SWITCHED) {
+        stateBefore = state;
         state = 6;
     }
     return;
@@ -409,8 +410,8 @@ void gameOver(void) {
     }
 
     if (SW4_SWITCHED) {
+        stateBefore = state;
         state = 6;
-        stateBefore = 5;
     }
     // restartCtr used to avoid accidental button presses
     if (restartCtr > RESTART_TIME) {
@@ -434,7 +435,7 @@ void highScores(void) {
     display_highscores();
 
     if (!(getsw() & 8)) {
-        state = 5;
+        state = stateBefore;
     }
     return;
 }

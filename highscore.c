@@ -8,6 +8,8 @@
 uint16_t memAddress = 0x0000;
 
 
+/* Helper functions provided by hello-temperature example project: */
+
 /* Wait for I2C bus to become idle */
 void i2c_idle() {
 	while (I2C1CON & 0x1F || I2C1STAT & (1 << 14)); //TRSTAT - return if idle OR if Master transmit is not in progress
@@ -65,6 +67,9 @@ void i2c_stop() {
 	i2c_idle();
 }
 
+
+
+/* Original code starts here: */
 
 // Reads 8 bytes sequentially from given start-address and returns them (AAA DDD EE)	
 void read_highscore(uint16_t address, uint8_t bytes, uint8_t* data) {
@@ -194,7 +199,7 @@ char insert_highscore(char playerName[], int playerHighscore) {
 	return 1;
 }
 
-/* load, compare and display all highscores (top 5) */
+/* load and display all highscores (top 5) */
 void display_highscores() {
 	int i;
 	int highscore = 0;

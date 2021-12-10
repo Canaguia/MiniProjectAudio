@@ -34,7 +34,6 @@ int gameStartCycle = 0;
 int gameRunningCycle = 0;
 int animCycle;
 int score = 0;
-volatile int randomSpice = 2313;
 
 int btnCounter = 2;
 uint8_t nameSlotIndex = 0;
@@ -49,18 +48,9 @@ char letter0[1] = "A";
 char letter1[1] = "A";
 char letter2[1] = "A";
 
-/* Interrupt Service Routine */
+/* Interrupt Service Routine (not used) */
 void user_isr(void) {
     return;
-}
-
-/* Returns a pseudorandom int based on the timer value and a given 0-max range (not included) */
-uint8_t pseudo_random(int max) {
-    int x, n;
-    n = TMR3 >> 2;
-    x = (n * randomSpice + 1729) % 5245;
-    randomSpice = x;
-    return (x % max);
 }
 
 /* Populates the left wall and right wall arrays */
@@ -98,8 +88,7 @@ void generate_walls() {
     return;
 }
 
-
-/* Lab-specific initialization goes here */
+/* General initialization goes here */
 void labinit(void)
 {
     int temp;
@@ -153,6 +142,8 @@ void labinit(void)
     return;
 }
 
+/* Draw player at current position and
+    change sprite depending on lives */
 void draw_player() {
     // flash current sprite if Invunerable
     if (playerInv) {
@@ -172,6 +163,7 @@ void draw_player() {
         }
     }
 
+    // change sprite depending on current lives
     switch (playerLives) {
     case 3:
         draw_balloon3(currentX, currentY);
@@ -191,6 +183,7 @@ void draw_player() {
     return;
 }
 
+/* Display splash screen art during game boot-up */
 void gameArt(void){
     if(gameArtCtr >= 0){
         int a = gameArtCtr % 10;
@@ -206,17 +199,24 @@ void gameArt(void){
     gameArtCtr--;
 }
 
+/* Game running loop,
+   renders, all game-components, 
+   handles collision checking and player input*/
 void gameRunning(void) {
+    // display current score
     draw_string(1, 1, itoaconv(score),1);
 
+    // Draw walls and entities
     draw_walls();
     render_entity();
 
+    // Check for player input & collision
     player_input();
 
     check_entity_collision();
 
-    draw_player(); // important that player is drawn last
+    // Draw the player
+    draw_player();
 
     // pause logic
     if (getsw() & 1) {
@@ -229,9 +229,10 @@ void gameRunning(void) {
     return;
 }
 
+/* Pauses game logic,
+   Accessible while the game is running*/
 void gamePaused(void) {
-
-    if (!(getsw() & 1)) {
+    if (SW1_SWITCHED)) {
         state = 2;
     }
 
@@ -239,6 +240,9 @@ void gamePaused(void) {
     return;
 }
 
+/* The start-screen game loop, plays a small 
+   animation and resets all important, held 
+   values (such as score) on game start */
 void gameStart(void) {
     animCycle = gameStartCycle / 100;
 
@@ -260,34 +264,33 @@ void gameStart(void) {
 
     draw_string(9, 10, "AIR",1);
     draw_string(9, 20, "BAL",1);
-    draw_string(9, 20, "LOON", 1);
+    draw_string(9, 30, "LOON", 1);
     draw_string(5, 116, "BTN1",1);
     draw_play(12, 100);
 
-    // populate starting walls and spawn entity pool out of view
-    populate_walls();
-    reset_entity_position();
-
-    // reset important values
-    gameRunningCycle = 0;
-    score = 0;
-    playerLives = 3;
-    inserted = 0;
-    currentX = 15;
-    currentY = 80;
-    playerInv = 0;
-    playerInvCtr = 0;
-
     gameStartCycle++;
 
-    if ((getbtns() & 1)) {
+    if (BTN1_PRESSED) {
+        // populate starting walls and spawn entity pool out of view
+        populate_walls();
+        reset_entity_position();
+        analogBaseline = sample_average();
+
+        // reset important values
+        gameRunningCycle = 0;
+        score = 0;
+        playerLives = 3;
+        inserted = 0;
+        currentX = 15;
+        currentY = 80;
+        playerInv = 0;
+        playerInvCtr = 0;
+
         if (tutorialHasBeenShown == 0) {
             state = 4;
             tutorialHasBeenShown = 1;
         }
         else {
-            // sample new analog-baseline
-            analogBaseline = sample_average();
             state = 2;
         }
     }
@@ -302,6 +305,8 @@ void gameStart(void) {
     return;
 }
 
+/* Tutorial state loop, 
+    accesible first time game is started*/
 void gameTutorial(void) {
     draw_string(4, 10, "TUTO",1);
     draw_string(4, 20, "RIAL",1);
@@ -313,24 +318,24 @@ void gameTutorial(void) {
     return;
 }
 
+/* The gameover-state loop, accessible after
+   player looses all three lives */
 void gameOver(void) {
     int i, t;
     PORTE = 0x00;
     
+    // visuals of game-over screen
     draw_string(0, 10, "GAME", 1);
     draw_string(0, 20, "OVER", 1);
-
     draw_string(0, 40, "SCR", 1);
     draw_string(0, 50, itoaconv(score), 1);
 
-
-
+    // check if score has not already been submitted
     if (!inserted) {
         t = 0;
         draw_string(0, 70, "NAME", 1);
 
         // Draw lines under characters
-        
         for (i = 0; i < 7; i++) {
             draw_pixel(i + 4, 100, 0);
             draw_pixel(i + 14, 100, 0);
@@ -339,6 +344,7 @@ void gameOver(void) {
 
         if (btnCounter < 0) {
             if (BTN1_PRESSED) {
+                // increment selected letter value
                 switch (nameSlotIndex) {
                 case 0:
                     letter0[0]++;
@@ -364,6 +370,7 @@ void gameOver(void) {
                 btnCounter = 2;
             }
             else if (BTN2_PRESSED) {
+                // swap currently selected letter
                 nameSlotIndex++;
                 if (nameSlotIndex > 2) {
                     nameSlotIndex = 0;
@@ -371,6 +378,7 @@ void gameOver(void) {
                 btnCounter = 2;
             }
             else if (BTN3_PRESSED) {
+                // Submit highscore to check if in top 5
                 if (restartCtr > RESTART_TIME) {
                     playerName[0] = letter0[0];
                     playerName[1] = letter1[0];
@@ -394,22 +402,25 @@ void gameOver(void) {
 
         draw_string(0, 110, "OK", 1);
 
+        // controls letter-flash duration
         gameOverCtr--;
         if (gameOverCtr <= 0) {
             gameOverCtr = 10;
         }
-
     }
+    // shown if a submitted score is in top-5
     else if (t) {
         draw_string(0, 70, "NEW", 1);
         draw_string(0, 80, "HIGH", 1);
         draw_string(0, 90, "SCR", 1);
     }
 
+    // go to highscore state
     if (SW4_SWITCHED) {
         stateBefore = state;
         state = 6;
     }
+
     // restartCtr used to avoid accidental button presses
     if (restartCtr > RESTART_TIME) {
         if (BTN4_PRESSED) {
@@ -421,8 +432,11 @@ void gameOver(void) {
     return;
 }
 
+/* The state for displaying highscores, 
+    accesible from start & game-over screens*/
 void highScores(void) {
     draw_string(5, 0, "TOP5",1);
+
     // Draw horizontal line under title 
     int i;
     for (i = 0; i < 31; i++) {
@@ -431,12 +445,14 @@ void highScores(void) {
 
     display_highscores();
 
-    if (!(getsw() & 8)) {
+    if (SW4_SWITCHED) {
         state = stateBefore;
     }
     return;
 }
 
+/* The central loop of the game, calls different loops depending on state
+    clears and updates the display every cycle (20hz Timer2)*/
 void masterGameLoop() {
     if (TMR2 == 0) {
         clear_canvas();

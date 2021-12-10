@@ -56,11 +56,8 @@ int main(void) {
 	/* SPI2CON bit ON = 1; */
 	SPI2CONSET = 0x8000;
 
-
 	display_init();	
 	labinit(); /* Do any lab-specific initialization */
-
-	int getSwitch = getsw();
 
 	while(1){
 		masterGameLoop();

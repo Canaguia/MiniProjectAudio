@@ -7,7 +7,20 @@
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
-/* Declare a helper function which is local to this file */
+
+volatile int randomSpice = 2313;
+
+/* Returns a pseudorandom int based on the timer value and a given 0-max range (not included) */
+uint8_t pseudo_random(int max) {
+    int x, n;
+    n = TMR3 >> 2;
+    x = (n * randomSpice + 1729) % 5245;
+    randomSpice = x;
+    return (x % max);
+}
+
+
+/* CODE FROM LABS:*/
 
 /* quicksleep:
    A simple function to create a small delay.
@@ -27,7 +40,6 @@ static void num32asc( char * s, int n )
   for( i = 28; i >= 0; i -= 4 )
     *s++ = "0123456789ABCDEF"[ (n >> i) & 15 ];
 }
-
 
 /*
  * itoa

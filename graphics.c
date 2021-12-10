@@ -19,44 +19,71 @@ static void num32asc(char* s, int);
 
 #define CANVAS_ARRAY_SIZE 512
 
-
+// This function sends data into 
 uint8_t spi_send_recv(uint8_t data) {
+	
+	// Wait for transmitter to be ready
 	while (!(SPI2STAT & 0x08));
+
+	// Write the next transmit byte.
 	SPI2BUF = data;
+
+	// Wait for receive byte.
 	while (!(SPI2STAT & 1));
+
 	return SPI2BUF;
 }
 
 void display_init(void) {
+	// We're going to be sending commands, so clear the Data/Cmd bit
 	DISPLAY_CHANGE_TO_COMMAND_MODE;
 	quicksleep(10);
+
+	// Start by turning VDD on and wait a while for the power to come up.
 	DISPLAY_ACTIVATE_VDD;
 	quicksleep(1000000);
 
+	// Display off command
 	spi_send_recv(0xAE);
+
+	// Bring Reset low and then high
 	DISPLAY_ACTIVATE_RESET;
 	quicksleep(10);
 	DISPLAY_DO_NOT_RESET;
 	quicksleep(10);
 
+	// Initialize display to desired operating mode.
+	// More specifically: Send the Set Charge Pump and Set Pre-Charge Period commands
 	spi_send_recv(0x8D);
 	spi_send_recv(0x14);
 
 	spi_send_recv(0xD9);
 	spi_send_recv(0xF1);
 
+	// Apply power to VBAT
+	// Turn on VCC and wait a while (manual suggests 100ms)
 	DISPLAY_ACTIVATE_VBAT;
 	quicksleep(10000000);
 
+	// remap columns
 	spi_send_recv(0xA1);
+	// remap rows
 	spi_send_recv(0xC8);
 
+
+	// Send the commands to select sequential COM configuration. This makes the
+	// display memory non-interleaved.
+
+	//set COM configuration command
 	spi_send_recv(0xDA);
+	//sequential COM, left/right remap enabled
 	spi_send_recv(0x20);
 
+	// ???
 	spi_send_recv(0x20);
 	spi_send_recv(0x0);
 
+	// Send Display On command
 	spi_send_recv(0xAF);
 	quicksleep(100);
 	/* Change to data mode */
@@ -74,7 +101,6 @@ void draw_pixel(int x, int y, int colPix) {
 }
 
 void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
-
 	const char* i;
 	uint8_t strLength = 0;
 	if (centered == 1) {

@@ -33,11 +33,11 @@ int main(void) {
 	PORTE = 0x0;
 	
 	/* Output pins for display signals */
-	PORTF = 0xFFFF;
+	PORTF = 0xFFFF; 
 	PORTG = (1 << 9);
 	ODCF = 0x0;
 	ODCG = 0x0;
-	TRISFCLR = 0x70;
+	TRISFCLR = 0x70; 
 	TRISGCLR = 0x200;
 	
 	/* Set up input pins */

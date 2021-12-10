@@ -41,7 +41,7 @@ uint8_t nameSlotIndex = 0;
 uint8_t stateBefore = 2;
 
 int gameOverCtr = 10;
-int gameArtCtr = 50;
+int gameArtCtr = 70;
 int restartCtr = 0;
 
 char playerName[] = "AAA";
@@ -193,15 +193,12 @@ void draw_player() {
 
 void gameArt(void){
     if(gameArtCtr >= 0){
-        switch (gameArtCtr % 2) {
-        case 0:
+        int a = gameArtCtr % 10;
+        if (a < 5) {
             draw_sprite(0, 0, 32, 128, uphi_art[0]);
-            break;
-        case 1:
+        }
+        else {
             draw_sprite(0, 0, 32, 128, uphi_art[1]);
-            break;
-        default:
-            break;
         }
     } else{
         state = 1;
@@ -263,7 +260,7 @@ void gameStart(void) {
 
     draw_string(9, 10, "AIR",1);
     draw_string(9, 20, "BAL",1);
-    draw_string(5, 30, "LOON",1);
+    draw_string(9, 20, "LOON", 1);
     draw_string(5, 116, "BTN1",1);
     draw_play(12, 100);
 

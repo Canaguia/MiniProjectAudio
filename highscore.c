@@ -227,8 +227,8 @@ void display_highscores() {
 		name[0] = charArr[i * 3];
 		name[1] = charArr[i * 3 + 1];
 		name[2] = charArr[i * 3 + 2];
-		draw_string(8, 12 + 20*i, name,1);
-		draw_string(10, 20 + 20*i, itoaconv(scoreArr[i]),1);
+		draw_string(8, 16 + 22*i, name,1);
+		draw_string(10, 24 + 22*i, itoaconv(scoreArr[i]),1);
 	}
 
 	return;

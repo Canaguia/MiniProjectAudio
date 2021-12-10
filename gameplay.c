@@ -91,9 +91,10 @@ void aggregate_volume() {
     }
     ampBuffer++;
 
-    // display ampVal
-    led_disp_volume(AMP_MIN);
+    // display ampVal as string (uncomment for debugging purposes)
+    //draw_string(5, 10, itoaconv(ampVal),1);
 
+    led_disp_volume(AMP_MIN);
     return;
 }
 
@@ -146,7 +147,6 @@ void player_input() {
     }
 
     aggregate_volume();
-    draw_string(5, 10, itoaconv(ampVal),1);
 
     if (ampVal > AMP_MIN || pressedBtn & 1) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
@@ -195,6 +195,7 @@ void player_out_of_bounds() {
     playerInv = 1;
     playerInvCtr = 50;
     playerUpVelocity = 0;
+    inputcycles = 20;
     currentX = playerSpawn_X;
     currentY = playerSpawn_Y;
     return;

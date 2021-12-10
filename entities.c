@@ -119,14 +119,16 @@ void check_entity_collision() {
 	return;
 }
 
-/* reset position of all entities */
+/* reset position of all entities, and reset spawn-cooldowns */
 void reset_entity_position() {
 	int i;
+	obsSpawnCooldown = DEF_OBS_COOLDOWN;
+	obsSpawnCooldownCtr = DEF_OBS_COOLDOWN;
 
-	for (i = 0; i < MAX_OBS; i ++)
+	for (i = 0; i <= MAX_OBS; i++)
 	{
 		obsPos[i][0] = 50;
-		obsPos[i][1] = 0;
+		obsPos[i][1] = 180;
 		obsPos[i][2] = 99;
 	}
 	return;

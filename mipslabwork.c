@@ -12,6 +12,12 @@
 #if TMR2PERIOD > 0xffff
 #error "Timer period overflow."
 #endif
+
+#define TMR3PERIOD ((80000000/256)/37) 
+#if TMR3PERIOD > 0xffff
+#error "Timer period overflow."
+#endif
+
 #define RESTART_TIME 20
 
 int wall_left[128];
@@ -28,7 +34,7 @@ int gameStartCycle = 0;
 int gameRunningCycle = 0;
 int animCycle;
 int score = 0;
-volatile int randomSpice = 43393;
+volatile int randomSpice = 2313;
 
 int btnCounter = 2;
 uint8_t nameSlotIndex = 0;
@@ -50,13 +56,11 @@ void user_isr(void) {
 
 /* Returns a pseudorandom int based on the timer value and a given 0-max range (not included) */
 uint8_t pseudo_random(int max) {
-    volatile uint8_t x;
-    //n = (TMR2 >> 1);
-    //k = TMR2 >> 3;
-    x = (151023 * randomSpice + 254392) % 921209;
+    int x, n;
+    n = TMR3 >> 2;
+    x = (n * randomSpice + 1729) % 5245;
     randomSpice = x;
-    x = x % max;
-    return x;
+    return (x % max);
 }
 
 /* Populates the left wall and right wall arrays */
@@ -65,7 +69,6 @@ void populate_walls() {
     for (i = 0; i < 128; i++) {
         t = pseudo_random(2);
         wall_left[i] = t;
-        t = pseudo_random(2);
         wall_right[i] = t;
     }
 }
@@ -90,7 +93,6 @@ void generate_walls() {
     // generate and insert new wall pattern
     t = pseudo_random(2);
     wall_left[0] = t;
-    t = pseudo_random(2);
     wall_right[0] = t;
 
     return;
@@ -104,9 +106,16 @@ void labinit(void)
     // Establish Timer2
     T2CONCLR = (0x1 << 15); // set timer to off
     T2CONSET = (0x7 << 4); // set prescale value to 1:256 (SET) (1:1) (CLR)
-    PR2 = TMR2PERIOD; //  Set period in Hz
     TMR2 = 0; // reset current value
+    PR2 = TMR2PERIOD; //  Set period in Hz
     T2CONSET = (0x1 << 15); // start timer
+
+    // Establish Timer3
+    T3CONCLR = (0x1 << 15);
+    T3CONSET = (0x7 << 4); 
+    TMR3 = 0;
+    PR3 = TMR3PERIOD; 
+    T3CONSET = (0x1 << 15); 
 
     // HANDLE ANALOG INPUT
     /* PORTB.4 is analog pin A1*/
@@ -125,7 +134,7 @@ void labinit(void)
 
     /* Set up output pins */
     ODCE = 0x0;
-    TRISECLR = 0x00;
+    TRISECLR = 0xFF;
 
     /* Set up i2c */
     I2C1CON = 0x0;
@@ -184,7 +193,16 @@ void draw_player() {
 
 void gameArt(void){
     if(gameArtCtr >= 0){
-        sprite_anim(0, 0, w, h, gameArtCtr, 2, uphi_art[0]);
+        switch (gameArtCtr % 2) {
+        case 0:
+            draw_sprite(0, 0, 32, 128, uphi_art[0]);
+            break;
+        case 1:
+            draw_sprite(0, 0, 32, 128, uphi_art[1]);
+            break;
+        default:
+            break;
+        }
     } else{
         state = 1;
     }
@@ -193,11 +211,7 @@ void gameArt(void){
 
 void gameRunning(void) {
     draw_string(1, 1, itoaconv(score),1);
-    // pause logic
-    if (getsw() & 1) {
-        state = 3;
-    }
-    
+
     draw_walls();
     render_entity();
 
@@ -207,6 +221,10 @@ void gameRunning(void) {
 
     draw_player(); // important that player is drawn last
 
+    // pause logic
+    if (getsw() & 1) {
+        state = 3;
+    }
     // game over
     if (playerLives == 0) {
         state = 5;
@@ -249,15 +267,19 @@ void gameStart(void) {
     draw_string(5, 116, "BTN1",1);
     draw_play(12, 100);
 
+    // populate starting walls and spawn entity pool out of view
     populate_walls();
     reset_entity_position();
 
+    // reset important values
     gameRunningCycle = 0;
     score = 0;
     playerLives = 3;
     inserted = 0;
     currentX = 15;
     currentY = 80;
+    playerInv = 0;
+    playerInvCtr = 0;
 
     gameStartCycle++;
 
@@ -267,6 +289,7 @@ void gameStart(void) {
             tutorialHasBeenShown = 1;
         }
         else {
+            // sample new analog-baseline
             analogBaseline = sample_average();
             state = 2;
         }

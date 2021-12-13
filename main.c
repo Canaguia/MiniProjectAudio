@@ -47,15 +47,19 @@ int main(void) {
 	/* Set up input pins */ //RD8, RD9, RD10, RD11 (switches)
 	TRISDSET = (0xF << 8);
 
+	/* Set up LED-output pins */
+	ODCE = 0x0;
+	TRISECLR = 0xFF;
+
 	/* Set up SPI as master */
 	SPI2CON = 0;
-	SPI2BRG = 4;
+	SPI2BRG = 4; // baud rate register
 	/* SPI2STAT bit SPIROV = 0; */
-	SPI2STATCLR = 0x40;
+	SPI2STATCLR = 0x40; // recieve overflow status clear
 	/* SPI2CON bit CKP = 1; */
-    SPI2CONSET = 0x40;
+    SPI2CONSET = 0x40; // Clock edge select (falling edge)
 	/* SPI2CON bit MSTEN = 1; */
-	SPI2CONSET = 0x20;
+	SPI2CONSET = 0x20; // Master Mode select
 	/* SPI2CON bit ON = 1; */
 	SPI2CONSET = 0x8000;
 

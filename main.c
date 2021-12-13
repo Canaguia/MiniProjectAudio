@@ -21,16 +21,16 @@ int main(void) {
 	*/
 	SYSKEY = 0xAA996655;  /* Unlock OSCCON, step 1 */
 	SYSKEY = 0x556699AA;  /* Unlock OSCCON, step 2 */
-	while(OSCCON & (1 << 21)); /* Wait until PBDIV ready */
+	while(OSCCON & (1 << 21)); /* Wait until PBDIV ready *///(PBDIV = PBCLOCK DIVISOR)
 	OSCCONCLR = 0x180000; /* clear PBDIV bit <0,1> */
 	while(OSCCON & (1 << 21));  /* Wait until PBDIV ready */
 	SYSKEY = 0x0;  /* Lock OSCCON */
 	
 	/* Set up output pins */
-	AD1PCFG = 0xFFFF;
-	ODCE = 0x0;
-	TRISECLR = 0xFF;
-	PORTE = 0x0;
+	AD1PCFG = 0xFFFF; // disable all analog input pins
+	ODCE = 0x0; // open drain off (variable output voltage)
+	TRISECLR = 0xFF; // set E-pins as output
+	PORTE = 0x0; // clear ports
 	
 	/* Output pins for display signals */
 	PORTF = 0xFFFF;

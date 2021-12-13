@@ -38,12 +38,13 @@ int ampBuffer = 0;
 // timer variables
 int timerCycles;
 
+/* Samples and returns an analog value from the analog-to-digital converter */
 int sample_analog(void){
     // Read&load new sound-int value
-    AD1CON1 |= (0x1 << 1); //SAMP
-    while (!(AD1CON1 & (0x1 << 1))); // SAMP
-    while (!(AD1CON1 & 0x1)); // DONE
-    return ADC1BUF0;
+    AD1CON1 |= (0x1 << 1); // enable sampling
+    while (!(AD1CON1 & (0x1 << 1))); // while sampling wait
+    while (!(AD1CON1 & 0x1)); // wait for A/D conversion done flag
+    return ADC1BUF0; // return value in first buffer
 }
 
 /* Takes an average analog input over a period of time */
@@ -126,7 +127,8 @@ void playerMoveLeft(void){
         currentX--;
     }
 }
-    
+
+/* deals with player input every game-loop */
 void player_input() {
     //move left, move right
     int pressedBtn = getbtns();
@@ -153,6 +155,7 @@ void player_input() {
 
     aggregate_volume();
 
+    /* update playerVelocity */
     if (ampVal > AMP_MIN || pressedBtn & 1) {
         if (playerUpVelocity < playerUpVelocity_MAX) {
             playerUpVelocity++;
@@ -166,6 +169,7 @@ void player_input() {
         inputcycles++;
     }
     
+    /* update player position accoridng to player-up velocity */
     // Make it so that the maximum speed is 1 pixel per frame (slowest is 1 per 5 frames)
     if (playerUpVelocity > 0) {
         if (velocityBuffer >= (playerUpVelocity_MAX - playerUpVelocity)) {

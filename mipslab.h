@@ -2,14 +2,10 @@
    Header file for all labs.
    This file written 2015 by F Lundevall
    Some parts are original code written by Axel Isaksson
+   other parts are original code by Filip & Sina
 */
 
-/* Declare display-related functions from Render.c */
-void display_image(int x, const uint8_t *data);
-void display_init(void);
-void display_string(int line, char *s);
-void display_update(void);
-
+/* graphics */
 uint8_t spi_send_recv(uint8_t data);
 
 // Canvas
@@ -35,7 +31,6 @@ extern int score;
 #define SW2_SWITCHED (getsw() & 2)
 #define SW3_SWITCHED (getsw() & 4)
 #define SW4_SWITCHED (getsw() & 8)
-
 
 //Gameplay
 extern uint8_t currentY;
@@ -110,24 +105,13 @@ extern const uint8_t const icon2[128];
 extern const uint8_t const balloon[128];
 extern const uint8_t const charArray[185];
 
-
-/* Declare functions written by students.
-   Note: Since we declare these functions here,
-   students must define their functions with the exact types
-   specified in the laboratory instructions. */
-/* Written as part of asm lab: delay, time2string */
-void delay(int);
-void time2string( char *, int );
-
-/* Written as part of i/o lab: getbtns, getsw, enable_interrupt */
+/* Input and output */
 int getbtns(void);
 int getsw(void);
-void enable_interrupt(void);
 void setled(uint8_t numLed);
 void clearled(uint8_t numLed);
 
-
-// SPRITE
+// SPRITES
 uint8_t const w;
 uint8_t const h;
 

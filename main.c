@@ -26,7 +26,7 @@ int main(void) {
 	while(OSCCON & (1 << 21));  /* Wait until PBDIV ready */
 	SYSKEY = 0x0;  /* Lock OSCCON */
 	
-	/* Set up output pins */
+	/* Set up output pins (LEDS */
 	AD1PCFG = 0xFFFF; // disable all analog input pins
 	ODCE = 0x0; // open drain off (variable output voltage)
 	TRISECLR = 0xFF; // set E-pins as output
@@ -40,10 +40,17 @@ int main(void) {
 	TRISFCLR = 0x70;
 	TRISGCLR = 0x200;
 	
-	/* Set up input pins */
+	/* Set up input pins */ //RF1, RD5, RD6, RD7 (pushbuttons)
+	/*
 	TRISDSET = (1 << 8);
 	TRISFSET = (1 << 1);
-	
+	*/
+	TRISDSET = (7 << 5);
+	TRISDSET = (0xF<<8);
+	TRISFSET = (1 << 1);
+
+	/* Set up input pins */ //RD8, RD9, RD10, RD11 (switches)
+
 	/* Set up SPI as master */
 	SPI2CON = 0;
 	SPI2BRG = 4;

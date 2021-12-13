@@ -20,7 +20,7 @@ static void num32asc(char* s, int);
 
 #define CANVAS_ARRAY_SIZE 512
 
-// This function sends data into 
+// This function sends data into the SPI2 buffer
 uint8_t spi_send_recv(uint8_t data) {
 
 	// Wait for transmitter to be ready
@@ -35,6 +35,7 @@ uint8_t spi_send_recv(uint8_t data) {
 	return SPI2BUF;
 }
 
+/*  Initialize the OLED display controller and turn the display on */
 void display_init(void) {
 	// We're going to be sending commands, so clear the Data/Cmd bit
 	DISPLAY_CHANGE_TO_COMMAND_MODE;
@@ -91,6 +92,10 @@ void display_init(void) {
 	DISPLAY_CHANGE_TO_DATA_MODE;
 }
 
+/*  Inserts data into the canvas array which represents the screen pixels.
+	The device is held vertically for our game, so the x-axis and the y-axis
+	 are flipped. colPix was supposed to check for collision but is not used anymore.
+ */
 void draw_pixel(int x, int y, int colPix) {
 	if (x < 32 && x >= 0 && y < 128 && y >= 0) {
 		int xOffset = x % 8;
@@ -101,10 +106,14 @@ void draw_pixel(int x, int y, int colPix) {
 	return;
 }
 
+/*  Displays the input string on the screen, with a given offset x and offset y. 
+	If the centered parameter is 1, the x argument is ignored and is assigned to
+	a fix value depending on number of letters in the string.
+*/
 void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
 	const char* i;
 	uint8_t strLength = 0;
-	if (centered == 1) {
+	if (centered) {
 		const char* a;
 		for (a = str; *a != '\0'; a++) {
 			strLength++;
@@ -113,6 +122,7 @@ void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
 		else if (strLength == 2) x = 11;
 		else if (strLength == 3) x = 8;
 		else if (strLength == 4) x = 5;
+		else if (strLength == 5) x = 2;
 		else x = 0;
 	}
 
@@ -140,6 +150,7 @@ void draw_string(uint8_t x, uint8_t y, char* str, char centered) {
 	}
 }
 
+/*  Displays a sprite on the screen with the given x and y offset values. */
 void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t data[]) {
 	int i, j;
 	for (i = 0; i < dx; i++) {
@@ -151,6 +162,7 @@ void draw_sprite(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, uint8_t data[]) {
 	}
 }
 
+/*  Runs an animation of sprites */
 void sprite_anim(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, int ctr, uint8_t frame_nr, uint8_t* sprite_array) {
 	int i;
 	for (i = 0; i < frame_nr; i++) {
@@ -160,6 +172,7 @@ void sprite_anim(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, int ctr, uint8_t 
 	}
 }
 
+/*  Enables canvas pixel data to be portrayed on the screen. Is called each frame. */
 void display_update(void) {
 	int i;
 	for (i = 0; i < CANVAS_ARRAY_SIZE; i++) {
@@ -167,6 +180,7 @@ void display_update(void) {
 	}
 }
 
+/*  Clears the canvas. Is called each frame. */
 void clear_canvas() {
 	int i;
 	for (i = 0; i < CANVAS_ARRAY_SIZE; i++) {

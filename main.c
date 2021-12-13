@@ -41,15 +41,11 @@ int main(void) {
 	TRISGCLR = 0x200;
 	
 	/* Set up input pins */ //RF1, RD5, RD6, RD7 (pushbuttons)
-	/*
-	TRISDSET = (1 << 8);
-	TRISFSET = (1 << 1);
-	*/
 	TRISDSET = (7 << 5);
-	TRISDSET = (0xF<<8);
 	TRISFSET = (1 << 1);
 
 	/* Set up input pins */ //RD8, RD9, RD10, RD11 (switches)
+	TRISDSET = (0xF << 8);
 
 	/* Set up SPI as master */
 	SPI2CON = 0;

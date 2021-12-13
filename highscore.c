@@ -169,7 +169,7 @@ char insert_highscore(char playerName[], int playerHighscore) {
 	// find and shift appropriate position for playerhighscore
 	int r = 5;
 	for (i = 4; i >= 0; i--) {
-		if (scoreArr[i] <= playerHighscore) {
+		if (scoreArr[i] < playerHighscore) {
 			scoreArr[i + 1] = scoreArr[i];
 			charArr[(i + 1) * 3] = charArr[i * 3];
 			charArr[(i + 1) * 3 + 1] = charArr[i * 3 + 1];

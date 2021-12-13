@@ -80,20 +80,6 @@ void display_highscores();
 char insert_highscore(char playerName[], int playerHighscore);
 void clear_highscore_data(void);
 
-/* Declare display_debug - a function to help debugging.
-
-   After calling display_debug,
-   the two middle lines of the display show
-   an address and its current contents.
-
-   There's one parameter: the address to read and display.
-
-   Note: When you use this function, you should comment out any
-   repeated calls to display_image; display_image overwrites
-   about half of the digits shown by display_debug.
-*/
-void display_debug( volatile int * const addr );
-
 /* Declare bitmap array containing font */
 extern const uint8_t const font[128*8];
 /* Declare bitmap array containing icon */
@@ -117,3 +103,17 @@ uint8_t const h;
 
 uint8_t uphi_art[2][4096];
 uint8_t shruiken[3][81];
+
+/* Declare display_debug - a function to help debugging.
+
+   After calling display_debug,
+   the two middle lines of the display show
+   an address and its current contents.
+
+   There's one parameter: the address to read and display.
+
+   Note: When you use this function, you should comment out any
+   repeated calls to display_image; display_image overwrites
+   about half of the digits shown by display_debug.
+*/
+void display_debug(volatile int* const addr);
